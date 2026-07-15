@@ -786,10 +786,12 @@ function loadModalFields() {
   document.getElementById('rate-vision-fam').value = visionRates.family;
 }
 
-btnOpenSettings.addEventListener('click', () => {
-  loadModalFields();
-  settingsModal.classList.add('active');
-});
+if (btnOpenSettings) {
+  btnOpenSettings.addEventListener('click', () => {
+    loadModalFields();
+    settingsModal.classList.add('active');
+  });
+}
 
 btnCloseSettings.addEventListener('click', () => {
   settingsModal.classList.remove('active');
