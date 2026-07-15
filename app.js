@@ -962,13 +962,13 @@ function openCheatSheet() {
   
   // Build Tabs dynamically based on which plans are offered to this group
   cheatTabsContainer.innerHTML = '';
-  Object.keys(PLANS).forEach(planId => {
+  Object.keys(PLAN_BENEFITS).forEach(planId => {
     // Check if the plan is offered (sharePct is not null)
     const sharePct = sharePcts[group][planId];
     if (sharePct !== null) {
       const btn = document.createElement('button');
       btn.className = `cheat-tab-btn ${planId === activeCheatPlanId ? 'active' : ''}`;
-      btn.textContent = PLANS[planId].name;
+      btn.textContent = PLAN_BENEFITS[planId].name;
       btn.addEventListener('click', () => {
         activeCheatPlanId = planId;
         // Update tabs active state
