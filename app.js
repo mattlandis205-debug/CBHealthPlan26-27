@@ -1016,8 +1016,14 @@ function generateBotResponse(userInput) {
 
   // 7. Dental Availability
   if (query.includes('dental') || query.includes('teeth')) {
-    return `🦷 <b>Voluntary Dental Plan Rules:</b><br>
+    return `🦷 <b>Voluntary Dental Plan Rules & Summaries:</b><br>
     <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>Plan Summaries:</b> 
+        <ul>
+          <li><a href="docs/guardian-dental-teachers.pdf" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">Guardian Dental Kit 1 (Teachers/Admin)</a></li>
+          <li><a href="docs/guardian-dental-support.pdf" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">Guardian Dental Kit 2 (Support Staff)</a></li>
+        </ul>
+      </li>
       <li><b>Support Staff:</b> Dental is <b>not offered</b> to Support Staff (10 or 12 month) under the district contract.</li>
       <li><b>Teachers (CBEA):</b> Available voluntary dental rate is $8.00 (Single), $16.00 (2-Party), or $24.00 (Family).</li>
       <li><b>Others:</b> Available for Act 93, Confidentials, and Transportation as a voluntary monthly add-on.</li>
@@ -1026,12 +1032,16 @@ function generateBotResponse(userInput) {
 
   // 8. Vision / Eye Med
   if (query.includes('vision') || query.includes('eye') || query.includes('glasses') || query.includes('eyemed')) {
-    return `👁️ <b>Voluntary Vision (Eye Med) Rates:</b><br>
-    Available voluntary vision is offered to all employee groups at:
+    return `👁️ <b>Voluntary Vision (Eye Med) Rates & Benefits:</b><br>
     <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li><b>Single:</b> $5.62 / month</li>
-      <li><b>2-Party:</b> $10.68 / month</li>
-      <li><b>Family:</b> $15.69 / month</li>
+      <li><b>EyeMed Summary:</b> Check the detailed <a href="docs/eyemed-benefits.pdf" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">EyeMed Vision Benefits PDF</a> for copays on exams, lenses, and frames.</li>
+      <li><b>Rates (offered to all groups):</b>
+        <ul>
+          <li><b>Single:</b> $5.62 / month</li>
+          <li><b>2-Party:</b> $10.68 / month</li>
+          <li><b>Family:</b> $15.69 / month</li>
+        </ul>
+      </li>
     </ul>`;
   }
 
