@@ -95,18 +95,21 @@
         </div>
 
         <!-- Enrollment Forms Card -->
+        <!-- Benefits Library & Links Card -->
         <div class="card" style="margin-top: 1.5rem;">
           <h2 class="card-title" style="margin-bottom: 0.75rem; font-size: 1.05rem;">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: var(--accent-indigo); vertical-align: middle; margin-right: 4px;">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
             </svg>
-            26-27 Enrollment Forms
+            Benefits Library & Links
           </h2>
-          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.45;">
-            Select your bargaining group/role to download your election form:
+          
+          <h4 style="margin: 0.75rem 0 0.4rem; font-size: 0.8rem; color: var(--text-primary); font-weight: 600;">1. Download Enrollment Form</h4>
+          <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; line-height: 1.4;">
+            Select your bargaining group to get your election form:
           </p>
-          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-            <select id="select-enrollment-group" style="width: 100%; padding: 0.6rem; font-size: 0.85rem; border-radius: var(--radius-sm); border: 1px solid rgba(15, 23, 42, 0.15); background: #ffffff; color: var(--text-primary); font-family: inherit; outline: none; cursor: pointer;">
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem;">
+            <select id="select-enrollment-group" style="width: 100%; padding: 0.5rem; font-size: 0.8rem; border-radius: var(--radius-sm); border: 1px solid rgba(15, 23, 42, 0.12); background: #ffffff; color: var(--text-primary); font-family: inherit; outline: none; cursor: pointer;">
               <option value="" disabled selected>Select bargaining group...</option>
               <option value="docs/cbea-form.pdf">🍎 Teachers (CBEA)</option>
               <option value="docs/act93-form.pdf">💼 Admin (Act 93)</option>
@@ -116,44 +119,38 @@
               <option value="docs/transportation12-form.pdf">🚍 Trans. (12 Month)</option>
               <option value="docs/transportation10-form.pdf">🚌 Trans. (10 Month)</option>
             </select>
-            <button id="btn-download-enrollment" class="btn-primary" style="width: 100%; font-size: 0.825rem; padding: 0.65rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem;" disabled>
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button id="btn-download-enrollment" class="btn-primary" style="width: 100%; font-size: 0.775rem; padding: 0.55rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem;" disabled>
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
               Download PDF Form
             </button>
           </div>
-        </div>
 
-        <!-- Useful Links Card -->
-        <div class="card" style="margin-top: 1.5rem;">
-          <h2 class="card-title" style="margin-bottom: 0.75rem; font-size: 1.05rem;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: var(--accent-indigo); vertical-align: middle; margin-right: 4px;">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-            </svg>
-            Useful Links
-          </h2>
-          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-            <a href="https://www.aetna.com/dsepublic/#/contentPage?page=providerSearchLanding&site_id=asa&language=en" target="_blank" class="btn-secondary" style="font-size: 0.8rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; width: 100%; box-sizing: border-box;">
-              <span>🔍 Find an In-Network Doctor</span>
-              <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">AETNA ↗️</span>
-            </a>
-            <a href="https://www.aetna.com/individuals-families/member-rules-policies/formulary.html" target="_blank" class="btn-secondary" style="font-size: 0.8rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; width: 100%; box-sizing: border-box;">
-              <span>💊 Aetna Prescription Drug Search</span>
-              <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">AETNA ↗️</span>
-            </a>
-            <a href="docs/guardian-dental-teachers.pdf" target="_blank" class="btn-secondary" style="font-size: 0.8rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; width: 100%; box-sizing: border-box;">
-              <span>🦷 Dental Kit 1 (Teachers/Admin)</span>
-              <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">PDF ⬇️</span>
-            </a>
-            <a href="docs/guardian-dental-support.pdf" target="_blank" class="btn-secondary" style="font-size: 0.8rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; width: 100%; box-sizing: border-box;">
-              <span>🦷 Dental Kit 2 (Support Staff)</span>
-              <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">PDF ⬇️</span>
-            </a>
-            <a href="docs/eyemed-benefits.pdf" target="_blank" class="btn-secondary" style="font-size: 0.8rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; width: 100%; box-sizing: border-box;">
-              <span>👁️ EyeMed Vision Benefits</span>
-              <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">PDF ⬇️</span>
-            </a>
+          <div style="border-top: 1px solid rgba(15, 23, 42, 0.08); padding-top: 0.75rem;">
+            <h4 style="margin: 0 0 0.5rem; font-size: 0.8rem; color: var(--text-primary); font-weight: 600;">2. Directories & Plan Details</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+              <a href="https://www.aetna.com/dsepublic/#/contentPage?page=providerSearchLanding&site_id=asa&language=en" target="_blank" class="btn-secondary" style="font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.45rem 0.65rem; width: 100%; box-sizing: border-box;">
+                <span>🔍 Find an In-Network Doctor</span>
+                <span style="font-size: 0.65rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">AETNA ↗️</span>
+              </a>
+              <a href="https://www.aetna.com/individuals-families/member-rules-policies/formulary.html" target="_blank" class="btn-secondary" style="font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.45rem 0.65rem; width: 100%; box-sizing: border-box;">
+                <span>💊 Aetna Rx Drug Search</span>
+                <span style="font-size: 0.65rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">AETNA ↗️</span>
+              </a>
+              <a href="docs/guardian-dental-teachers.pdf" target="_blank" class="btn-secondary" style="font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.45rem 0.65rem; width: 100%; box-sizing: border-box;">
+                <span>🦷 Dental Kit 1 (Teachers/Admin)</span>
+                <span style="font-size: 0.65rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">PDF ⬇️</span>
+              </a>
+              <a href="docs/guardian-dental-support.pdf" target="_blank" class="btn-secondary" style="font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.45rem 0.65rem; width: 100%; box-sizing: border-box;">
+                <span>🦷 Dental Kit 2 (Support Staff)</span>
+                <span style="font-size: 0.65rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">PDF ⬇️</span>
+              </a>
+              <a href="docs/eyemed-benefits.pdf" target="_blank" class="btn-secondary" style="font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.45rem 0.65rem; width: 100%; box-sizing: border-box;">
+                <span>👁️ EyeMed Vision Benefits</span>
+                <span style="font-size: 0.65rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">PDF ⬇️</span>
+              </a>
+            </div>
           </div>
         </div>
       </aside>
@@ -201,35 +198,14 @@
           </div>
         </div>
 
-        <!-- Prescription & Capital Rx Info Card -->
-        <div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(59, 130, 246, 0.05)); border: 1px solid rgba(99, 102, 241, 0.15);">
-          <div style="display: flex; flex-direction: column; gap: 1rem; justify-content: space-between; align-items: flex-start;">
-            <div style="flex: 1;">
-              <h2 class="card-title" style="margin-bottom: 0.4rem; color: var(--accent-indigo); display: flex; align-items: center;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-indigo); margin-right: 6px;"><path d="M4.5 12.5l8-8a6 6 0 1 1 8.5 8.5l-8 8a6 6 0 1 1-8.5-8.5zM14 8l2 2" /></svg>
-                Prescription Coverage & Capital Rx
-              </h2>
-              <p style="font-size: 0.85rem; line-height: 1.5; color: var(--text-secondary); margin: 0;">
-                Prescription drug coverage is <b>automatically included</b> with all CBSD medical plans. You do not need to purchase it as an add-on. Pharmacy benefits are managed by <b>Capital Rx</b>.
-              </p>
-            </div>
-            <div style="width: 100%;">
-              <a href="https://app.cap-rx.com/login" target="_blank" class="btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.85rem; padding: 0.65rem 1rem; width: 100%; md:width: auto; box-sizing: border-box; background: var(--accent-indigo);">
-                <span>Log In / Register (Capital Rx Portal)</span>
-                <span>↗️</span>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <!-- SECTION 3: Voluntary Benefits Coverage Accordion -->
+        <!-- SECTION 3: Detailed Benefits & Plan Summaries Accordion -->
         <div class="card" style="margin-bottom: 2rem;">
           <h2 class="card-title">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-indigo); vertical-align: middle; margin-right: 6px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            3. Voluntary Benefits Coverage Details
+            3. Detailed Benefits & Plan Summaries
           </h2>
           <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
-            Click on a voluntary plan below to expand and view detailed coverage summaries, deductibles, allowances, and copays.
+            Click on a plan below to expand and view detailed coverage summaries, deductibles, allowances, and copays.
           </p>
 
           <div class="accordion-group">
@@ -326,6 +302,45 @@
                       </li>
                       <li><b>Exam Frequency:</b> Once every plan year for children, once every 2 plan years for adults. Lenses/frames also follow this frequency.</li>
                     </ul>
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <!-- Prescription Accordion Item -->
+            <details class="accordion-item">
+              <summary class="accordion-summary">
+                <span>💊 Prescription Drug Coverage (Capital Rx)</span>
+              </summary>
+              <div class="accordion-content">
+                <div style="display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem; border-radius: var(--radius-sm);">
+                  <p style="margin: 0; font-size: 0.825rem; line-height: 1.5; color: var(--text-secondary);">
+                    Prescription drug coverage is <b>automatically included</b> with all CBSD medical plans. You do not need to register for it as an add-on, and there are no extra monthly premiums.
+                  </p>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 0.5rem;">
+                    <div>
+                      <h4 style="margin: 0 0 0.4rem; color: var(--accent-indigo); font-size: 0.85rem;">Standard Copays (30-Day Retail)</h4>
+                      <ul style="margin: 0; padding-left: 1.15rem; font-size: 0.8rem; display: flex; flex-direction: column; gap: 0.25rem;">
+                        <li><b>Tier 1 (Generic):</b> $10 Copay</li>
+                        <li><b>Tier 2 (Preferred Brand):</b> $25 Copay</li>
+                        <li><b>Tier 3 (Non-Preferred Brand):</b> $40 Copay</li>
+                        <li><b>Tier 4 (Specialty):</b> $100 Copay</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 style="margin: 0 0 0.4rem; color: var(--accent-indigo); font-size: 0.85rem;">Mail Order Tiers (90-Day Supply)</h4>
+                      <ul style="margin: 0; padding-left: 1.15rem; font-size: 0.8rem; display: flex; flex-direction: column; gap: 0.25rem;">
+                        <li><b>Tier 1 (Generic):</b> $20 Copay</li>
+                        <li><b>Tier 2 (Preferred Brand):</b> $50 Copay</li>
+                        <li><b>Tier 3 (Non-Preferred):</b> $80 Copay</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div style="margin-top: 0.75rem; border-top: 1px solid rgba(15, 23, 42, 0.06); padding-top: 0.75rem;">
+                    <a href="https://app.cap-rx.com/login" target="_blank" class="btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.8rem; padding: 0.55rem 0.85rem; width: 100%; md:width: auto; box-sizing: border-box; background: var(--accent-indigo);">
+                      <span>Log In / Register (Capital Rx Portal)</span>
+                      <span>↗️</span>
+                    </a>
                   </div>
                 </div>
               </div>

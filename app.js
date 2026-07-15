@@ -470,20 +470,20 @@ function updatePremiumDisplay() {
       const isSupportGroup = group === 'support_12' || group === 'support_10';
       let dentalStatusHTML = '';
       if (isSupportGroup) {
-        dentalStatusHTML = `<div style="color: var(--text-muted); font-style: italic;">✗ Dental: Not Available</div>`;
+        dentalStatusHTML = `<div style="color: var(--text-muted); font-style: italic; padding: 0.15rem 0.35rem; border-radius: 4px; background: rgba(15, 23, 42, 0.02); width: fit-content; font-size: 0.775rem;">✗ Dental: Not Available</div>`;
       } else {
         if (isDental) {
-          dentalStatusHTML = `<div style="color: var(--accent-teal); font-weight: 500;">✓ Dental: Voluntary Added (+$${dentalCost.toFixed(2)}/mo)</div>`;
+          dentalStatusHTML = `<div style="color: #166534; font-weight: 600; padding: 0.15rem 0.35rem; border-radius: 4px; background: #f0fdf4; border: 1px solid #bbf7d0; width: fit-content; font-size: 0.775rem;">✓ Dental: +$${dentalCost.toFixed(2)}/mo</div>`;
         } else {
-          dentalStatusHTML = `<div style="color: var(--text-muted); font-style: italic;">✗ Dental: Not Selected</div>`;
+          dentalStatusHTML = `<div style="color: var(--text-muted); font-style: italic; padding: 0.15rem 0.35rem; width: fit-content; font-size: 0.775rem;">✗ Dental: Not Selected</div>`;
         }
       }
 
       let visionStatusHTML = '';
       if (isVision) {
-        visionStatusHTML = `<div style="color: var(--accent-teal); font-weight: 500;">✓ Vision: Voluntary Added (+$${visionCost.toFixed(2)}/mo)</div>`;
+        visionStatusHTML = `<div style="color: #166534; font-weight: 600; padding: 0.15rem 0.35rem; border-radius: 4px; background: #f0fdf4; border: 1px solid #bbf7d0; width: fit-content; font-size: 0.775rem;">✓ Vision: +$${visionCost.toFixed(2)}/mo</div>`;
       } else {
-        visionStatusHTML = `<div style="color: var(--text-muted); font-style: italic;">✗ Vision (Eye Med): Not Selected</div>`;
+        visionStatusHTML = `<div style="color: var(--text-muted); font-style: italic; padding: 0.15rem 0.35rem; width: fit-content; font-size: 0.775rem;">✗ Vision (Eye Med): Not Selected</div>`;
       }
       
       let summaryHTML = '';
