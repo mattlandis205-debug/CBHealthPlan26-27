@@ -1046,9 +1046,10 @@ function generateBotResponse(userInput) {
   }
 
   // 10. Out of Network
-  if (query.includes('network') || query.includes('out-of-network') || query.includes('oon') || query.includes('in-network')) {
-    return `🏥 <b>In-Network vs. Out-of-Network:</b><br>
+  if (query.includes('network') || query.includes('out-of-network') || query.includes('oon') || query.includes('in-network') || query.includes('doctor') || query.includes('physician') || query.includes('find a')) {
+    return `🏥 <b>In-Network vs. Out-of-Network & Doctor Directory:</b><br>
     <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>Find a Doctor:</b> Verify if your doctor is in-network using the official <a href="https://www.aetna.com/dsepublic/#/contentPage?page=providerSearchLanding&site_id=asa&language=en" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">Aetna Provider Finder</a>.</li>
       <li><b>In-Network:</b> Standard copays and 100% covered preventative care.</li>
       <li><b>Out-of-Network:</b> Subject to deductibles first, then coinsurance splits:
         <ul>
