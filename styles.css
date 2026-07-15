@@ -1028,19 +1028,19 @@ tr:hover td {
   color: var(--text-secondary);
 }
 
-/* Card Risk Analysis Styles */
-.risk-details summary {
+/* Card Risk Analysis & Descriptor Collapse Styles */
+.risk-details summary, .descriptor-details summary {
   list-style: none;
 }
-.risk-details summary::-webkit-details-marker {
+.risk-details summary::-webkit-details-marker, .descriptor-details summary::-webkit-details-marker {
   display: none;
 }
-.risk-details summary::after {
+.risk-details summary::after, .descriptor-details summary::after {
   content: '▼';
   font-size: 0.65rem;
   transition: transform var(--transition-fast);
   opacity: 0.6;
 }
-.risk-details[open] summary::after {
+.risk-details[open] summary::after, .descriptor-details[open] summary::after {
   transform: rotate(180deg);
 }
