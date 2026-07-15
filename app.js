@@ -1059,6 +1059,69 @@ function generateBotResponse(userInput) {
     </ul>`;
   }
 
+  // 11. Maternity / Having a Baby
+  if (query.includes('baby') || query.includes('maternity') || query.includes('pregnant') || query.includes('childbirth') || query.includes('delivery') || query.includes('prenatal') || query.includes('pregnancy')) {
+    return `👶 <b>Having a Baby / Maternity Coverage:</b><br>
+    If you are welcoming a new baby under the family plan:
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>Prenatal & Postnatal Care:</b> 100% covered in-network ($0 cost) across all plans (considered preventive care under the ACA).</li>
+      <li><b>Delivery & Hospital Stay:</b> Covered under Inpatient Hospitalization:
+        <ul>
+          <li><b>Open Access:</b> $250 Copay per admission.</li>
+          <li><b>Open Choice 2:</b> $350 Copay per admission.</li>
+          <li><b>Open Choice 3:</b> $300 Copay per admission (the in-net deductible does not apply to this copay).</li>
+          <li><b>Open Choice 1:</b> $75 per day (max $375 per admission).</li>
+        </ul>
+      </li>
+      <li><b>Pediatric Visits (Well-Baby Checks):</b> Preventive wellness checkups are 100% covered ($0). Sick visits go under PCP copays ($15 OA, $20 Choice 2, $25 Choice 3, $10 Choice 1).</li>
+      <li><b>Max Exposure:</b> The family out-of-pocket maximum limit is <b>$13,200</b> for all plans in-network.</li>
+    </ul>`;
+  }
+
+  // 12. Surgeries / Outpatient Care
+  if (query.includes('surgery') || query.includes('operation') || query.includes('outpatient') || query.includes('procedure')) {
+    return `🔪 <b>Outpatient Surgery Coverage:</b><br>
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>Open Access:</b> $100 Copay in-network (deductible: $0).</li>
+      <li><b>Open Choice 1:</b> $75 Copay in-network (deductible: $0).</li>
+      <li><b>Open Choice 2:</b> $200 Copay in-network (deductible: $0).</li>
+      <li><b>Open Choice 3:</b> $200 Copay in-network (deductible does not apply to outpatient surgery in-network).</li>
+    </ul>`;
+  }
+
+  // 13. Prescriptions / Pharmacy
+  if (query.includes('prescription') || query.includes('meds') || query.includes('drugs') || query.includes('pharmacy') || query.includes('rx')) {
+    return `💊 <b>Prescription Drug Copays:</b><br>
+    <b>30-Day Retail Supply:</b>
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.1rem;">
+      <li><b>Tier 1 (Generic):</b> $10 Copay</li>
+      <li><b>Tier 2 (Preferred Brand):</b> $25 Copay</li>
+      <li><b>Tier 3 (Non-Preferred Brand):</b> $40 Copay</li>
+      <li><b>Tier 4 (Specialty):</b> $100 Copay</li>
+    </ul>
+    <b>90-Day Mail Order Supply:</b>
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.1rem;">
+      <li><b>Tier 1 (Generic):</b> $20 Copay</li>
+      <li><b>Tier 2 (Preferred Brand):</b> $50 Copay</li>
+      <li><b>Tier 3 (Non-Preferred):</b> $80 Copay</li>
+    </ul>
+    <i>Note: Under the Transportation contract, retail Tier 2/3/4 copays are slightly lower ($20/$35/$35) and mail-order Tier 2 is $40.</i>`;
+  }
+
+  // 14. Emergency Room & Ambulance
+  if (query.includes('er ') || query.includes('emergency') || query.includes('accident') || query.includes('ambulance')) {
+    return `🚨 <b>Emergency Room & Ambulance Care:</b><br>
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>Emergency Room Visit:</b> <b>$100 Copay</b> across all four plans (waived immediately if admitted directly to the hospital).</li>
+      <li><b>Ambulance Services:</b>
+        <ul>
+          <li>Open Access, Choice 1, Choice 2: 100% Covered ($0 cost).</li>
+          <li>Open Choice 3: 100% Covered <i>after meeting the deductible</i> ($1,100 Ind / $2,200 Fam).</li>
+        </ul>
+      </li>
+    </ul>`;
+  }
+
   // Default fallback
   return `❓ <b>I can help you with specific benefits details!</b><br>
   Try asking about:<br>
