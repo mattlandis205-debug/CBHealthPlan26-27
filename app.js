@@ -469,36 +469,41 @@ function updatePremiumDisplay() {
       if (planId === 'oa') {
         summaryHTML = `
           <div class="plan-summary-box" style="margin: 0.75rem 0; padding: 0.65rem; background: rgba(15, 23, 42, 0.03); border-radius: 6px; border-left: 3px solid var(--accent-blue);">
-            <div style="font-weight: 700; font-size: 0.825rem; color: var(--text-primary); margin-bottom: 0.15rem;">🚀 "Best Bang for Your Buck"</div>
-            <div style="font-size: 0.775rem; line-height: 1.35; color: var(--text-secondary);">
-              More upfront premium than Choice 3, but the most predictable out-of-pocket costs with $0 deductible.
+            <div style="font-weight: 700; font-size: 0.825rem; color: var(--text-primary); margin-bottom: 0.25rem;">Moderate Up Front, Low Later</div>
+            <div style="font-size: 0.75rem; line-height: 1.4; color: var(--text-secondary);">
+              <b>Up Front:</b> You pay a moderate, middle-of-the-road monthly premium ($492.45) and have absolutely no deductible to satisfy.<br>
+              <b>Later:</b> You pay relatively low, predictable copays when you actually go to the doctor ($15 for primary care, $25 for specialists).
             </div>
           </div>
         `;
       } else if (planId === 'oc1') {
         summaryHTML = `
           <div class="plan-summary-box" style="margin: 0.75rem 0; padding: 0.65rem; background: rgba(15, 23, 42, 0.03); border-radius: 6px; border-left: 3px solid var(--accent-purple);">
-            <div style="font-weight: 700; font-size: 0.825rem; color: var(--text-primary); margin-bottom: 0.15rem;">✨ "The Premium Classic"</div>
-            <div style="font-size: 0.775rem; line-height: 1.35; color: var(--text-secondary);">
-              Offered to select groups. Higher premiums offset by low copays and low out-of-pocket costs with no deductible.
+            <div style="font-weight: 700; font-size: 0.825rem; color: var(--text-primary); margin-bottom: 0.25rem;">High Up Front, Lowest Later</div>
+            <div style="font-size: 0.75rem; line-height: 1.4; color: var(--text-secondary);">
+              <span style="font-style: italic; opacity: 0.8; display: block; margin-bottom: 0.2rem;">Note: This plan is eliminated under the current teacher contract, but here is how it is structured:</span>
+              <b>Up Front:</b> It requires a high monthly premium and a $1,200 family deductible that must be met first.<br>
+              <b>Later:</b> Once that deductible is cleared, it offers the absolute cheapest out-of-pocket costs at the time of service ($10 for primary care, $20 for specialists).
             </div>
           </div>
         `;
       } else if (planId === 'oc2') {
         summaryHTML = `
           <div class="plan-summary-box" style="margin: 0.75rem 0; padding: 0.65rem; background: rgba(15, 23, 42, 0.03); border-radius: 6px; border-left: 3px solid var(--accent-coral);">
-            <div style="font-weight: 700; font-size: 0.825rem; color: var(--text-primary); margin-bottom: 0.15rem;">🚗 "The Mercedes Plan"</div>
-            <div style="font-size: 0.775rem; line-height: 1.35; color: var(--text-secondary);">
-              Extremely comprehensive coverage with highest monthly premium. You go girl!
+            <div style="font-weight: 700; font-size: 0.825rem; color: var(--text-primary); margin-bottom: 0.25rem;">Highest Up Front, Moderate Later</div>
+            <div style="font-size: 0.75rem; line-height: 1.4; color: var(--text-secondary);">
+              <b>Up Front:</b> You pay the highest monthly premium out of your paycheck ($601.67), with no deductible to satisfy.<br>
+              <b>Later:</b> Despite paying the most up front, you pay higher copays at the doctor's office than you do on the Open Access plan ($20 for primary care, $40 for specialists).
             </div>
           </div>
         `;
       } else if (planId === 'oc3') {
         summaryHTML = `
           <div class="plan-summary-box" style="margin: 0.75rem 0; padding: 0.65rem; background: rgba(15, 23, 42, 0.03); border-radius: 6px; border-left: 3px solid var(--accent-teal);">
-            <div style="font-weight: 700; font-size: 0.825rem; color: var(--text-primary); margin-bottom: 0.15rem;">🛡️ "The Thrift Option"</div>
-            <div style="font-size: 0.775rem; line-height: 1.35; color: var(--text-secondary);">
-              Lowest monthly premium of any plan. In exchange, you pay 100% of diagnostics out-of-pocket until you meet the deductible. Stay safe out there!
+            <div style="font-weight: 700; font-size: 0.825rem; color: var(--text-primary); margin-bottom: 0.25rem;">Lowest Premium Up Front, Highest Later</div>
+            <div style="font-size: 0.75rem; line-height: 1.4; color: var(--text-secondary);">
+              <b>Up Front:</b> You save significantly on your monthly paycheck deduction ($254.65), but you take on a steep $3,300 family deductible that must be paid out-of-pocket before the insurance truly kicks in.<br>
+              <b>Later:</b> Even after you clear that high deductible, your costs at the time of service remain the highest, as you are responsible for paying 50% coinsurance on most medical bills.
             </div>
           </div>
         `;
