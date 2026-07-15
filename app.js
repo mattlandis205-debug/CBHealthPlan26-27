@@ -727,6 +727,10 @@ function renderExplorer() {
       else inText = `$${inVal} Copay per stay`;
     } else if (activeBenefit === 'er') {
       inText = `$${inVal} Copay<br>(waived if admitted)`;
+    } else if (activeBenefit === 'chiro') {
+      const chiroVal = plan.in.chiro_copay;
+      if (chiroVal === 0) inText = '100% Covered<br><span style="font-size: 0.7rem; opacity: 0.8;">(See SPD for details)</span>';
+      else inText = `$${chiroVal} Copay<br><span style="font-size: 0.7rem; opacity: 0.8;">(See SPD for details)</span>`;
     } else if (inVal === 0) {
       inText = '100% Covered ($0)';
     } else if (inVal !== null) {
