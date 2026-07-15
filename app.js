@@ -1103,21 +1103,14 @@ function generateBotResponse(userInput) {
 
   // 13. Prescriptions / Pharmacy
   if (query.includes('prescription') || query.includes('meds') || query.includes('drugs') || query.includes('pharmacy') || query.includes('rx')) {
-    return `💊 <b>Prescription Drug Copays:</b><br>
-    <b>30-Day Retail Supply:</b>
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.1rem;">
-      <li><b>Tier 1 (Generic):</b> $10 Copay</li>
-      <li><b>Tier 2 (Preferred Brand):</b> $25 Copay</li>
-      <li><b>Tier 3 (Non-Preferred Brand):</b> $40 Copay</li>
-      <li><b>Tier 4 (Specialty):</b> $100 Copay</li>
-    </ul>
-    <b>90-Day Mail Order Supply:</b>
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.1rem;">
-      <li><b>Tier 1 (Generic):</b> $20 Copay</li>
-      <li><b>Tier 2 (Preferred Brand):</b> $50 Copay</li>
-      <li><b>Tier 3 (Non-Preferred):</b> $80 Copay</li>
-    </ul>
-    <i>Note: Under the Transportation contract, retail Tier 2/3/4 copays are slightly lower ($20/$35/$35) and mail-order Tier 2 is $40.</i>`;
+    return `💊 <b>Prescription Drug Coverage (Capital Rx):</b><br>
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>Automatic Benefit:</b> Prescription coverage is automatically included with all CBSD medical plans (no add-on selection needed).</li>
+      <li><b>Capital Rx Login:</b> Log in or register at the <a href="https://app.cap-rx.com/login" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">Capital Rx Portal</a> to track your prescriptions, look up covered drugs, and manage your account.</li>
+      <li><b>30-Day Retail Tiers:</b> Generic ($10), Preferred Brand ($25), Non-Preferred Brand ($40), Specialty ($100).</li>
+      <li><b>90-Day Mail Order Tiers:</b> Generic ($20), Preferred Brand ($50), Non-Preferred ($80).</li>
+      <li><b>Note:</b> Under the Transportation contract, retail Tier 2/3/4 copays are slightly lower ($20/$35/$35) and mail-order Tier 2 is $40.</li>
+    </ul>`;
   }
 
   // 14. Emergency Room & Ambulance
