@@ -510,16 +510,16 @@ function updatePremiumDisplay() {
           <div class="plan-summary-box" style="margin: 0.75rem 0; padding: 0.65rem; background: rgba(15, 23, 42, 0.03); border-radius: 6px; border-left: 3px solid var(--accent-coral);">
             <div style="font-weight: 700; font-size: 0.825rem; color: var(--text-primary); margin-bottom: 0.15rem;">🚗 "The Mercedes Plan"</div>
             <div style="font-size: 0.775rem; line-height: 1.35; color: var(--text-secondary);">
-              Extremely comprehensive coverage with moderate premiums and flat copays—but is it truly needed for your family?
+              Extremely comprehensive coverage with highest monthly premium. You go girl!
             </div>
           </div>
         `;
       } else if (planId === 'oc3') {
         summaryHTML = `
           <div class="plan-summary-box" style="margin: 0.75rem 0; padding: 0.65rem; background: rgba(15, 23, 42, 0.03); border-radius: 6px; border-left: 3px solid var(--accent-teal);">
-            <div style="font-weight: 700; font-size: 0.825rem; color: var(--text-primary); margin-bottom: 0.15rem;">🛡️ "The Saver Plan"</div>
+            <div style="font-weight: 700; font-size: 0.825rem; color: var(--text-primary); margin-bottom: 0.15rem;">🛡️ "The Thrift Option"</div>
             <div style="font-size: 0.775rem; line-height: 1.35; color: var(--text-secondary);">
-              Lowest monthly premiums (often $0). In exchange, you pay 100% of diagnostics out-of-pocket until you meet the deductible.
+              Lowest monthly premium of any plan. In exchange, you pay 100% of diagnostics out-of-pocket until you meet the deductible. Stay safe out there!
             </div>
           </div>
         `;
@@ -976,8 +976,7 @@ function generateBotResponse(userInput) {
     return `🚗 <b>Open Choice 2 ("The Mercedes Plan")</b><br>
     <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
       <li><b>Premium Cost:</b> Moderate monthly premiums.</li>
-      <li><b>Benefit:</b> Features flat copays for all primary services ($20 PCP, $40 specialist, $350 hospital stays) with <b>$0 in-network deductible</b>.</li>
-      <li><b>Gist:</b> A very comprehensive plan with solid safety, but check if Open Access or Choice 3 might suit you better for a lower premium.</li>
+      <li><b>Benefit:</b> Extremely comprehensive coverage with highest monthly premium. You go girl!</li>
     </ul>`;
   }
 
@@ -1119,6 +1118,15 @@ function generateBotResponse(userInput) {
           <li>Open Choice 3: 100% Covered <i>after meeting the deductible</i> ($1,100 Ind / $2,200 Fam).</li>
         </ul>
       </li>
+    </ul>`;
+  }
+
+  // 15. Open Choice 3 / Thrift Option
+  if (query.includes('choice 3') || query.includes('oc3') || query.includes('thrift') || query.includes('saver')) {
+    return `🛡️ <b>Open Choice 3 ("The Thrift Option")</b><br>
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>Premium Cost:</b> Lowest monthly premium of any plan.</li>
+      <li><b>Benefit:</b> In exchange, you pay 100% of diagnostics out-of-pocket until you meet the deductible. Stay safe out there!</li>
     </ul>`;
   }
 
