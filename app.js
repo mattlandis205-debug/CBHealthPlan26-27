@@ -1214,3 +1214,26 @@ chatQuickBtns.forEach(btn => {
     }, 300);
   });
 });
+
+// ==========================================
+// 14. Sidebar Enrollment PDF Dropdown Selector
+// ==========================================
+const selectEnrollmentGroup = document.getElementById('select-enrollment-group');
+const btnDownloadEnrollment = document.getElementById('btn-download-enrollment');
+
+if (selectEnrollmentGroup && btnDownloadEnrollment) {
+  selectEnrollmentGroup.addEventListener('change', () => {
+    if (selectEnrollmentGroup.value) {
+      btnDownloadEnrollment.disabled = false;
+    } else {
+      btnDownloadEnrollment.disabled = true;
+    }
+  });
+
+  btnDownloadEnrollment.addEventListener('click', () => {
+    const url = selectEnrollmentGroup.value;
+    if (url) {
+      window.open(url, '_blank');
+    }
+  });
+}

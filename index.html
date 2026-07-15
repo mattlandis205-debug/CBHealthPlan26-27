@@ -103,37 +103,25 @@
             26-27 Enrollment Forms
           </h2>
           <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.45;">
-            Download the official benefits election form for your group:
+            Select your bargaining group/role to download your election form:
           </p>
-          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-            <a href="docs/cbea-form.pdf" target="_blank" class="btn-secondary" style="font-size: 0.8rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; width: 100%; box-sizing: border-box;">
-              <span>🍎 Teachers (CBEA)</span>
-              <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">PDF ⬇️</span>
-            </a>
-            <a href="docs/act93-form.pdf" target="_blank" class="btn-secondary" style="font-size: 0.8rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; width: 100%; box-sizing: border-box;">
-              <span>💼 Admin (Act 93)</span>
-              <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">PDF ⬇️</span>
-            </a>
-            <a href="docs/confidential-form.pdf" target="_blank" class="btn-secondary" style="font-size: 0.8rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; width: 100%; box-sizing: border-box;">
-              <span>🤫 Confidential Staff</span>
-              <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">PDF ⬇️</span>
-            </a>
-            <a href="docs/support12-form.pdf" target="_blank" class="btn-secondary" style="font-size: 0.8rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; width: 100%; box-sizing: border-box;">
-              <span>🛠️ Support (12 Month)</span>
-              <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">PDF ⬇️</span>
-            </a>
-            <a href="docs/support10-form.pdf" target="_blank" class="btn-secondary" style="font-size: 0.8rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; width: 100%; box-sizing: border-box;">
-              <span>🛠️ Support (10 Month)</span>
-              <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">PDF ⬇️</span>
-            </a>
-            <a href="docs/transportation12-form.pdf" target="_blank" class="btn-secondary" style="font-size: 0.8rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; width: 100%; box-sizing: border-box;">
-              <span>🚍 Trans. (12 Month)</span>
-              <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">PDF ⬇️</span>
-            </a>
-            <a href="docs/transportation10-form.pdf" target="_blank" class="btn-secondary" style="font-size: 0.8rem; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; width: 100%; box-sizing: border-box;">
-              <span>🚌 Trans. (10 Month)</span>
-              <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 700; color: var(--accent-indigo);">PDF ⬇️</span>
-            </a>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <select id="select-enrollment-group" style="width: 100%; padding: 0.6rem; font-size: 0.85rem; border-radius: var(--radius-sm); border: 1px solid rgba(15, 23, 42, 0.15); background: #ffffff; color: var(--text-primary); font-family: inherit; outline: none; cursor: pointer;">
+              <option value="" disabled selected>Select bargaining group...</option>
+              <option value="docs/cbea-form.pdf">🍎 Teachers (CBEA)</option>
+              <option value="docs/act93-form.pdf">💼 Admin (Act 93)</option>
+              <option value="docs/confidential-form.pdf">🤫 Confidential Staff</option>
+              <option value="docs/support12-form.pdf">🛠️ Support (12 Month)</option>
+              <option value="docs/support10-form.pdf">🛠️ Support (10 Month)</option>
+              <option value="docs/transportation12-form.pdf">🚍 Trans. (12 Month)</option>
+              <option value="docs/transportation10-form.pdf">🚌 Trans. (10 Month)</option>
+            </select>
+            <button id="btn-download-enrollment" class="btn-primary" style="width: 100%; font-size: 0.825rem; padding: 0.65rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem;" disabled>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Download PDF Form
+            </button>
           </div>
         </div>
       </aside>
