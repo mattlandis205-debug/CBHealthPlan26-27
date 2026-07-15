@@ -947,6 +947,36 @@ if (typeof window !== 'undefined') {
     if (e.target === cheatSheetModal) {
       cheatSheetModal.classList.remove('active');
     }
+    if (e.target === dentalCheatSheetModal) {
+      dentalCheatSheetModal.classList.remove('active');
+    }
+  });
+}
+
+// 10c. Dental Cheat Sheet Modal Event Handlers
+const dentalCheatSheetModal = document.getElementById('dental-cheat-sheet-modal');
+const btnOpenDentalCheat = document.getElementById('btn-dental-cheat');
+const btnCloseDentalCheat = document.getElementById('btn-close-dental-cheat');
+const dentalCheatListContainer = document.getElementById('dental-cheat-list-container');
+const dentalCheatSearchInput = document.getElementById('dental-cheat-search-input');
+
+if (btnOpenDentalCheat) {
+  btnOpenDentalCheat.addEventListener('click', () => {
+    dentalCheatSearchInput.value = ''; // Reset search
+    renderDentalCheatList();
+    dentalCheatSheetModal.classList.add('active');
+  });
+}
+
+if (btnCloseDentalCheat) {
+  btnCloseDentalCheat.addEventListener('click', () => {
+    dentalCheatSheetModal.classList.remove('active');
+  });
+}
+
+if (dentalCheatSearchInput) {
+  dentalCheatSearchInput.addEventListener('input', () => {
+    renderDentalCheatList();
   });
 }
 
@@ -1516,5 +1546,79 @@ if (selectEnrollmentGroup && btnDownloadEnrollment) {
     if (url) {
       window.open(url, '_blank');
     }
+  });
+}
+
+function renderDentalCheatList() {
+  const group = selectGroup.value;
+  const filter = dentalCheatSearchInput ? dentalCheatSearchInput.value.toLowerCase() : '';
+  
+  if (!dentalCheatListContainer) return;
+  dentalCheatListContainer.innerHTML = '';
+  
+  const isSupport = group === 'support_12' || group === 'support_10';
+  
+  if (isSupport) {
+    dentalCheatListContainer.innerHTML = `
+      <div style="text-align: center; padding: 2rem 1rem;">
+        <span style="font-size: 2.5rem; display: block; margin-bottom: 0.75rem;">🦷</span>
+        <h4 style="margin: 0 0 0.5rem; color: #991b1b; font-size: 0.95rem;">Dental Benefits Not Offered</h4>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin: 0 auto; max-width: 320px;">
+          Under the current Support Staff contract (both 10 & 12 Month), dental coverage is not available as a voluntary plan option.
+        </p>
+      </div>
+    `;
+    return;
+  }
+  
+  // Dental benefits items for all other groups
+  const listItems = [
+    { name: '🦷 Calendar Year Deductible', value: '$0 / person (No Deductible)', desc: 'You do not have to pay anything out-of-pocket before benefits begin.' },
+    { name: '✨ Preventive Care (Cleanings & Exams)', value: '100% Covered (In-Network)', desc: 'Routine checkups, exams, cleanings, and diagnostic X-rays. Allowed once every 6 months.' },
+    { name: 'Basic Services (Fillings & Root Canals)', value: '80% Covered (In-Network)', desc: 'Basic restorative fillings, root canals, simple extractions, and emergency pain relief.' },
+    { name: '👑 Major Services (Crowns & Bridges)', value: '50% Covered (In-Network)', desc: 'Major restorative work including crowns, bridges, inlays, onlays, and dentures.' },
+    { name: '💰 Annual Benefit Maximum', value: '$2,000 per person / year', desc: 'The maximum total amount Guardian will pay for dental services per person in a calendar year.' }
+  ];
+  
+  // Orthodontia depends on the group
+  const isTrans = group === 'transportation_12' || group === 'transportation_10';
+  if (isTrans) {
+    listItems.push({ name: '👧 Child Orthodontia (Braces)', value: 'Not Covered', desc: 'Kit 2 for Transportation does not offer child orthodontia.' });
+  } else {
+    listItems.push({ name: '👧 Child Orthodontia (Braces)', value: '50% Covered (up to $1,000 Lifetime Max)', desc: 'For children under age 19. Caps at a $1,000 maximum per child.' });
+  }
+  
+  // Maximum Rollover details
+  listItems.push({ name: '📈 Maximum Rollover Threshold', value: '$800 maximum claim submissions', desc: 'If your total claims for the year are under $800, you are eligible to roll over funds.' });
+  listItems.push({ name: '💵 Rollover Account Addition', value: '+$400 (+$600 if using in-network only)', desc: 'The amount rolled over into your MRA account (Maximum Rollover Account).' });
+  listItems.push({ name: '🔒 Rollover Account Cap', value: '$1,500 maximum account balance', desc: 'The maximum total balance you can accumulate in your rollover account.' });
+  
+  // Filter items
+  const filteredItems = listItems.filter(item => 
+    item.name.toLowerCase().includes(filter) || 
+    item.value.toLowerCase().includes(filter) ||
+    item.desc.toLowerCase().includes(filter)
+  );
+  
+  if (filteredItems.length === 0) {
+    dentalCheatListContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin: 1.5rem 0;">No matching dental benefits found.</div>`;
+    return;
+  }
+  
+  // Render
+  filteredItems.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'cheat-item';
+    row.style.flexDirection = 'column';
+    row.style.alignItems = 'stretch';
+    row.style.gap = '0.35rem';
+    row.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
+        <span class="cheat-item-name" style="font-size: 0.825rem;">${item.name}</span>
+        <span class="cheat-item-value" style="font-size: 0.775rem;">${item.value}</span>
+      </div>
+      <div style="font-size: 0.725rem; color: var(--text-secondary); line-height: 1.35; opacity: 0.85;">${item.desc}</div>
+    `;
+    dentalCheatListContainer.appendChild(row);
   });
 }

@@ -41,6 +41,12 @@
           </svg>
           📋 See Entire Plan (Copay Cheat Sheet)
         </button>
+        <button id="btn-dental-cheat" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.85rem; border-radius: 100px; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); color: var(--accent-indigo); font-size: 0.775rem; font-weight: 600; text-decoration: none; transition: opacity 0.15s; cursor: pointer; font-family: inherit;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="vertical-align: middle;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618-3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          🦷 See Dental Plan (Dental Cheat Sheet)
+        </button>
       </div>
     </header>
 
@@ -395,6 +401,30 @@
 
         <!-- Scrollable content -->
         <div class="cheat-list" id="cheat-list-container">
+          <!-- Dynamically populated list -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dental Cheat Sheet Modal -->
+  <div class="modal" id="dental-cheat-sheet-modal">
+    <div class="modal-content" style="max-width: 600px; padding: 1.5rem; border-radius: var(--radius-md);">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" style="margin: 0; font-size: 1.15rem;">🦷 Dental Plan Cheat Sheet</h3>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0.15rem 0 0;">Guardian PPO benefit reference for your group</p>
+        </div>
+        <button class="modal-close" id="btn-close-dental-cheat" aria-label="Close Dental Cheat Sheet Modal">&times;</button>
+      </div>
+      <div class="modal-body" style="padding-top: 1rem;">
+        <!-- Search bar -->
+        <div style="position: relative; margin-bottom: 1rem;">
+          <input type="text" id="dental-cheat-search-input" placeholder="🔍 Search dental benefits e.g. cleanings, crowns, ortho..." style="width: 100%; padding: 0.6rem; font-size: 0.8rem; border-radius: var(--radius-sm); border: 1px solid rgba(15, 23, 42, 0.12); outline: none; box-sizing: border-box; font-family: inherit;">
+        </div>
+
+        <!-- Scrollable content -->
+        <div class="cheat-list" id="dental-cheat-list-container">
           <!-- Dynamically populated list -->
         </div>
       </div>
