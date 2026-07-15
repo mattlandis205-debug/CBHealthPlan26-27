@@ -1027,3 +1027,20 @@ tr:hover td {
   line-height: 1.5;
   color: var(--text-secondary);
 }
+
+/* Card Risk Analysis Styles */
+.risk-details summary {
+  list-style: none;
+}
+.risk-details summary::-webkit-details-marker {
+  display: none;
+}
+.risk-details summary::after {
+  content: '▼';
+  font-size: 0.65rem;
+  transition: transform var(--transition-fast);
+  opacity: 0.6;
+}
+.risk-details[open] summary::after {
+  transform: rotate(180deg);
+}

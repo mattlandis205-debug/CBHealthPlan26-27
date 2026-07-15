@@ -509,6 +509,63 @@ function updatePremiumDisplay() {
         `;
       }
 
+      // Risk Factor calculations
+      let riskHTML = '';
+      if (planId !== 'oc1') {
+        const oopMaxVal = planId === 'oc2' 
+          ? (tier === 'individual' ? 7500 : 15000)
+          : (tier === 'individual' ? 6600 : 13200);
+        
+        const worstCaseHitVal = empAnnual + oopMaxVal;
+        
+        let rankStr = '';
+        let rankClass = '';
+        let bottomLineText = '';
+        
+        if (planId === 'oc3') {
+          rankStr = 'Rank 1: Lowest Total Financial Risk';
+          rankClass = '#166534';
+          bottomLineText = `<b>The Bottom Line:</b> Because your monthly paycheck deductions are so low, your total financial exposure in a catastrophic medical year is actually the lowest of all three plans. You will hit your out-of-pocket ceiling much faster due to the upfront deductible and 50% coinsurance, but your combined bill caps out at the lowest overall number.`;
+        } else if (planId === 'oa') {
+          rankStr = 'Rank 2: Moderate Total Financial Risk';
+          rankClass = '#b45309';
+          bottomLineText = `<b>The Bottom Line:</b> This plan hits the middle spot. It shares the exact same $13,200 medical cap as Open Choice 3, but because you are paying roughly $2,850 more in fixed premium costs over the year, your worst-case total is higher by that exact amount.`;
+        } else if (planId === 'oc2') {
+          rankStr = 'Rank 3: Highest Total Financial Risk';
+          rankClass = '#991b1b';
+          bottomLineText = `<b>The Bottom Line:</b> This is the most expensive worst-case scenario by a wide margin. You are hit from both sides: you pay the highest guaranteed premium out of your paycheck and you have a higher legal cap on what the hospital can bill you before 100% coverage kicks in. In a terrible medical year, this plan costs a family $5,964.24 more than Open Choice 3.`;
+        }
+        
+        riskHTML = `
+          <details class="risk-details" style="margin-top: 0.75rem; border-top: 1px dashed rgba(15, 23, 42, 0.12); padding-top: 0.6rem;">
+            <summary style="font-weight: 600; color: var(--accent-indigo); cursor: pointer; font-size: 0.775rem; outline: none; display: flex; align-items: center; justify-content: space-between; user-select: none;">
+              <span>⚠️ Worst-Case Scenario Risk</span>
+              <span style="font-size: 0.7rem; opacity: 0.75; font-weight: 700; color: ${rankClass}; text-transform: uppercase;">${rankStr.split(':')[0]}</span>
+            </summary>
+            <div style="margin-top: 0.5rem; background: rgba(15, 23, 42, 0.02); padding: 0.5rem; border-radius: 4px; font-size: 0.75rem; line-height: 1.4; color: var(--text-secondary); text-align: left;">
+              <div style="font-weight: 700; color: ${rankClass}; margin-bottom: 0.25rem; font-size: 0.775rem;">${rankStr}</div>
+              <table style="width: 100%; font-size: 0.725rem; border-collapse: collapse; margin-bottom: 0.4rem;">
+                <tr style="border-bottom: 1px solid rgba(15, 23, 42, 0.05);">
+                  <td style="padding: 0.2rem 0; font-weight: 600; text-align: left;">Annual Premium Cost</td>
+                  <td style="padding: 0.2rem 0; text-align: right; color: var(--text-primary); font-weight: 500;">$${empAnnual.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(15, 23, 42, 0.05);">
+                  <td style="padding: 0.2rem 0; font-weight: 600; text-align: left;">Out-of-Pocket Max</td>
+                  <td style="padding: 0.2rem 0; text-align: right; color: var(--text-primary); font-weight: 500;">$${oopMaxVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                </tr>
+                <tr style="font-weight: 700; color: ${rankClass};">
+                  <td style="padding: 0.25rem 0; text-align: left;">Total Worst-Case Hit</td>
+                  <td style="padding: 0.25rem 0; text-align: right;">$${worstCaseHitVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                </tr>
+              </table>
+              <div style="font-size: 0.725rem; line-height: 1.35; color: var(--text-secondary); border-top: 1px solid rgba(15, 23, 42, 0.05); padding-top: 0.4rem;">
+                ${bottomLineText}
+              </div>
+            </div>
+          </details>
+        `;
+      }
+
       cardHTML = `
         <div class="card plan-card plan-${planId}" id="card-plan-${planId}">
           <div class="plan-header">
@@ -533,6 +590,7 @@ function updatePremiumDisplay() {
               ${visionStatusHTML}
             </div>
           </div>
+          ${riskHTML}
         </div>
       `;
     }
