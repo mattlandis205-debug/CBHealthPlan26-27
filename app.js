@@ -996,35 +996,73 @@ function renderCheatList() {
   
   cheatListContainer.innerHTML = '';
   
-  const planData = PLANS[planId];
+  const planData = PLAN_BENEFITS[planId];
   if (!planData) return;
   
   // Gather copays dynamically
   const isOutOfNetwork = toggleNetwork.checked;
   const listItems = [];
   
-  // Add common medical benefits
-  Object.keys(planData.benefits).forEach(benefitKey => {
-    const benefitName = getBenefitName(benefitKey);
-    const value = planData.benefits[benefitKey][isOutOfNetwork ? 'outNetwork' : 'inNetwork'];
-    
-    // Format benefit display value
+  // List of medical benefits in a clean, consistent order
+  const benefitsList = [
+    { key: 'pcp', name: '🩺 Primary Care Visit (PCP)' },
+    { key: 'specialist', name: '👤 Specialist Office Visit' },
+    { key: 'urgent', name: '⚡ Urgent Care Visit' },
+    { key: 'er', name: '🚨 Emergency Room Care' },
+    { key: 'inpatient', name: '🏥 Inpatient Hospital Stay' },
+    { key: 'outpatient', name: '🔪 Outpatient Surgery' },
+    { key: 'therapy_copay', name: '💪 Physical / Occup / Speech Therapy' },
+    { key: 'chiro_copay', name: '🦴 Chiropractic Care' },
+    { key: 'xray', name: '🩻 Routine X-Ray Services' },
+    { key: 'lab', name: '🧪 Routine Lab Work' },
+    { key: 'imaging', name: '🌀 Complex Imaging (MRI, CT, PET)' }
+  ];
+  
+  const networkKey = isOutOfNetwork ? 'out' : 'in';
+  const benefitsObj = planData[networkKey];
+
+  benefitsList.forEach(item => {
     let displayVal = '';
-    if (value === null) {
-      displayVal = 'Not Covered';
-    } else if (typeof value === 'number') {
-      if (value === 0) {
-        displayVal = '100% Covered ($0)';
+    
+    if (isOutOfNetwork) {
+      if (item.key === 'preventive') {
+        displayVal = 'Not Covered';
       } else {
-        displayVal = `$${value} Copay`;
+        const coinsurancePct = Math.round((1 - planData.out.coinsurance) * 100);
+        displayVal = `${coinsurancePct}% Coinsurance after Deductible`;
       }
-    } else if (value.includes('%')) {
-      displayVal = `${value} Coinsurance`;
     } else {
-      displayVal = value; // String descriptions e.g. "50% coinsurance after deductible"
+      const rawVal = benefitsObj[item.key];
+      
+      if (item.key === 'preventive') {
+        displayVal = '100% Covered ($0)';
+      } else if (item.key === 'lab') {
+        if (planId === 'oc3') displayVal = '100% Covered after Deductible';
+        else displayVal = '100% Covered ($0)';
+      } else if (item.key === 'xray' || item.key === 'imaging') {
+        if (planId === 'oc3') displayVal = '100% Covered after Deductible';
+        else if (rawVal === 0) displayVal = '100% Covered ($0)';
+        else displayVal = `$${rawVal} Copay`;
+      } else if (item.key === 'therapy_copay') {
+        if (planId === 'oa') displayVal = '100% Covered ($0)';
+        else if (planId === 'oc1') displayVal = '$15 Copay (visits 1-30), $25 Copay (visits 31-60)';
+        else if (planId === 'oc2') displayVal = '$20 Copay (visits 1-30), $40 Copay (visits 31-60)';
+        else if (planId === 'oc3') displayVal = '$25 Copay (visits 1-30), $50 Copay (visits 31-60)';
+      } else if (item.key === 'inpatient') {
+        if (planId === 'oc1') displayVal = '$75 / day (max $375 per stay)';
+        else displayVal = `$${rawVal} Copay per stay`;
+      } else if (item.key === 'er') {
+        displayVal = `$${rawVal} Copay (waived if admitted)`;
+      } else if (rawVal === 0) {
+        displayVal = '100% Covered ($0)';
+      } else if (rawVal !== null) {
+        displayVal = `$${rawVal} Copay`;
+      } else {
+        displayVal = 'N/A';
+      }
     }
     
-    listItems.push({ name: benefitName, value: displayVal, category: benefitKey });
+    listItems.push({ name: item.name, value: displayVal, category: 'medical' });
   });
   
   // Add Rx Tiers (which are core benefits)
