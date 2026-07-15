@@ -343,7 +343,6 @@ const selectTier = document.getElementById('coverage-tier');
 const toggleNetwork = document.getElementById('toggle-network');
 const networkStatusText = document.getElementById('network-status-text');
 const toggleVision = document.getElementById('toggle-vision');
-const toggleDental = document.getElementById('toggle-dental');
 const toggleHours = document.getElementById('toggle-hours');
 
 // Check plan availability and generate premium cards
@@ -364,20 +363,6 @@ function updatePremiumDisplay() {
   };
   const formPath = GROUP_FORM_MAP[group];
   
-  // Handle Dental checkbox availability conditionally
-  const isSupport = group === 'support_12' || group === 'support_10';
-  if (isSupport) {
-    toggleDental.checked = false;
-    toggleDental.disabled = true;
-    toggleDental.parentElement.style.opacity = '0.5';
-    const labelSpan = toggleDental.parentElement.querySelector('span:last-child');
-    if (labelSpan) labelSpan.textContent = 'Dental (Not Available for Support)';
-  } else {
-    toggleDental.disabled = false;
-    toggleDental.parentElement.style.opacity = '1';
-    const labelSpan = toggleDental.parentElement.querySelector('span:last-child');
-    if (labelSpan) labelSpan.textContent = 'Add Voluntary Dental';
-  }
   
   // Update network status text
   if (toggleNetwork.checked) {
@@ -450,12 +435,10 @@ function updatePremiumDisplay() {
       const empAnnual = empMonthly * 12;
       
       const isVision = toggleVision.checked;
-      const isDental = toggleDental.checked;
       const visionCost = isVision ? visionRates[tier] : 0;
-      const dentalCost = isDental ? dentalRates[group][tier] : 0;
       
-      const totalEmpMonthly = empMonthly + visionCost + dentalCost;
-      const totalEmpAnnual = empAnnual + (visionCost * 12) + (dentalCost * 12);
+      const totalEmpMonthly = empMonthly + visionCost;
+      const totalEmpAnnual = empAnnual + (visionCost * 12);
       
       const pays = PAY_PERIODS[group];
       const paycheckDeduction = (totalEmpAnnual) / pays;
@@ -472,11 +455,7 @@ function updatePremiumDisplay() {
       if (isSupportGroup) {
         dentalStatusHTML = `<div style="color: var(--text-muted); font-style: italic; padding: 0.15rem 0.35rem; border-radius: 4px; background: rgba(15, 23, 42, 0.02); width: fit-content; font-size: 0.775rem;">✗ Dental: Not Available</div>`;
       } else {
-        if (isDental) {
-          dentalStatusHTML = `<div style="color: #166534; font-weight: 600; padding: 0.15rem 0.35rem; border-radius: 4px; background: #f0fdf4; border: 1px solid #bbf7d0; width: fit-content; font-size: 0.775rem;">✓ Dental: +$${dentalCost.toFixed(2)}/mo</div>`;
-        } else {
-          dentalStatusHTML = `<div style="color: var(--text-muted); font-style: italic; padding: 0.15rem 0.35rem; width: fit-content; font-size: 0.775rem;">✗ Dental: Not Selected</div>`;
-        }
+        dentalStatusHTML = `<div style="color: #166534; font-weight: 600; padding: 0.15rem 0.35rem; border-radius: 4px; background: #f0fdf4; border: 1px solid #bbf7d0; width: fit-content; font-size: 0.775rem;">✓ Dental: Included</div>`;
       }
 
       let visionStatusHTML = '';
@@ -918,10 +897,6 @@ toggleVision.addEventListener('change', () => {
   renderExplorer();
 });
 
-toggleDental.addEventListener('change', () => {
-  updatePremiumDisplay();
-  renderExplorer();
-});
 
 toggleHours.addEventListener('change', () => {
   updatePremiumDisplay();
