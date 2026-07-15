@@ -35,6 +35,12 @@
           </svg>
           Email Kelly Kessling (Benefits Manager)
         </a>
+        <button id="btn-cheat-sheet" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.85rem; border-radius: 100px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); color: #059669; font-size: 0.775rem; font-weight: 600; text-decoration: none; transition: opacity 0.15s; cursor: pointer; font-family: inherit;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="vertical-align: middle;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+          📋 See Entire Plan (Copay Cheat Sheet)
+        </button>
       </div>
     </header>
 
@@ -363,6 +369,36 @@
         <b>⚠️ Disclaimer:</b> This simulator is designed to provide helpful, illustrative comparison information based on official district contract documents for the 2026-27 plan year. It does not constitute official financial or enrollment advice. Employees should consult their families and the Human Resources department for plan-specific decisions.
       </p>
     </footer>
+  </div>
+
+
+  <!-- Copay Cheat Sheet Modal -->
+  <div class="modal" id="cheat-sheet-modal">
+    <div class="modal-content" style="max-width: 600px; padding: 1.5rem; border-radius: var(--radius-md);">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" style="margin: 0; font-size: 1.15rem;">📋 Mobile Copay Cheat Sheet</h3>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0.15rem 0 0;">Quick reference for your active bargaining group</p>
+        </div>
+        <button class="modal-close" id="btn-close-cheat" aria-label="Close Cheat Sheet Modal">&times;</button>
+      </div>
+      <div class="modal-body" style="padding-top: 1rem;">
+        <!-- Plan Tabs -->
+        <div class="cheat-tabs" id="cheat-tabs-container">
+          <!-- Dynamically populated tabs -->
+        </div>
+        
+        <!-- Search bar -->
+        <div style="position: relative; margin-bottom: 1rem;">
+          <input type="text" id="cheat-search-input" placeholder="🔍 Search copays e.g. ER, doctor, chiro, generic..." style="width: 100%; padding: 0.6rem; font-size: 0.8rem; border-radius: var(--radius-sm); border: 1px solid rgba(15, 23, 42, 0.12); outline: none; box-sizing: border-box; font-family: inherit;">
+        </div>
+
+        <!-- Scrollable content -->
+        <div class="cheat-list" id="cheat-list-container">
+          <!-- Dynamically populated list -->
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Settings Edit Modal -->

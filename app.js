@@ -907,6 +907,199 @@ btnSaveRates.addEventListener('click', () => {
   renderExplorer();
 });
 
+// 10b. Copay Cheat Sheet Modal Event Handlers
+const cheatSheetModal = document.getElementById('cheat-sheet-modal');
+const btnOpenCheat = document.getElementById('btn-cheat-sheet');
+const btnCloseCheat = document.getElementById('btn-close-cheat');
+const cheatTabsContainer = document.getElementById('cheat-tabs-container');
+const cheatListContainer = document.getElementById('cheat-list-container');
+const cheatSearchInput = document.getElementById('cheat-search-input');
+
+let activeCheatPlanId = 'oa';
+
+if (btnOpenCheat) {
+  btnOpenCheat.addEventListener('click', () => {
+    // Find currently active plan ID or default to Open Access 'oa'
+    const firstActiveCard = document.querySelector('.plan-card');
+    if (firstActiveCard) {
+      const classes = firstActiveCard.className;
+      if (classes.includes('plan-oc2')) activeCheatPlanId = 'oc2';
+      else if (classes.includes('plan-oc3')) activeCheatPlanId = 'oc3';
+      else if (classes.includes('plan-oc1')) activeCheatPlanId = 'oc1';
+      else activeCheatPlanId = 'oa';
+    }
+    
+    cheatSearchInput.value = ''; // Reset search
+    openCheatSheet();
+    cheatSheetModal.classList.add('active');
+  });
+}
+
+if (btnCloseCheat) {
+  btnCloseCheat.addEventListener('click', () => {
+    cheatSheetModal.classList.remove('active');
+  });
+}
+
+// Close when clicking outside modal content
+if (typeof window !== 'undefined') {
+  window.addEventListener('click', (e) => {
+    if (e.target === cheatSheetModal) {
+      cheatSheetModal.classList.remove('active');
+    }
+  });
+}
+
+if (cheatSearchInput) {
+  // Search input keyup listener
+  cheatSearchInput.addEventListener('input', () => {
+    renderCheatList();
+  });
+}
+
+function openCheatSheet() {
+  const group = selectGroup.value;
+  
+  // Build Tabs dynamically based on which plans are offered to this group
+  cheatTabsContainer.innerHTML = '';
+  Object.keys(PLANS).forEach(planId => {
+    // Check if the plan is offered (sharePct is not null)
+    const sharePct = sharePcts[group][planId];
+    if (sharePct !== null) {
+      const btn = document.createElement('button');
+      btn.className = `cheat-tab-btn ${planId === activeCheatPlanId ? 'active' : ''}`;
+      btn.textContent = PLANS[planId].name;
+      btn.addEventListener('click', () => {
+        activeCheatPlanId = planId;
+        // Update tabs active state
+        document.querySelectorAll('.cheat-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderCheatList();
+      });
+      cheatTabsContainer.appendChild(btn);
+    }
+  });
+  
+  // Make sure current active plan is valid, if not fall back to first tab
+  const activeTabBtn = cheatTabsContainer.querySelector('.cheat-tab-btn.active');
+  if (!activeTabBtn && cheatTabsContainer.firstChild) {
+    cheatTabsContainer.firstChild.click();
+  } else {
+    renderCheatList();
+  }
+}
+
+function renderCheatList() {
+  const group = selectGroup.value;
+  const planId = activeCheatPlanId;
+  const filter = cheatSearchInput.value.toLowerCase();
+  
+  cheatListContainer.innerHTML = '';
+  
+  const planData = PLANS[planId];
+  if (!planData) return;
+  
+  // Gather copays dynamically
+  const isOutOfNetwork = toggleNetwork.checked;
+  const listItems = [];
+  
+  // Add common medical benefits
+  Object.keys(planData.benefits).forEach(benefitKey => {
+    const benefitName = getBenefitName(benefitKey);
+    const value = planData.benefits[benefitKey][isOutOfNetwork ? 'outNetwork' : 'inNetwork'];
+    
+    // Format benefit display value
+    let displayVal = '';
+    if (value === null) {
+      displayVal = 'Not Covered';
+    } else if (typeof value === 'number') {
+      if (value === 0) {
+        displayVal = '100% Covered ($0)';
+      } else {
+        displayVal = `$${value} Copay`;
+      }
+    } else if (value.includes('%')) {
+      displayVal = `${value} Coinsurance`;
+    } else {
+      displayVal = value; // String descriptions e.g. "50% coinsurance after deductible"
+    }
+    
+    listItems.push({ name: benefitName, value: displayVal, category: benefitKey });
+  });
+  
+  // Add Rx Tiers (which are core benefits)
+  // Check if group is transportation (slightly different copays)
+  const isTrans = group === 'transportation_12' || group === 'transportation_10';
+  const rxRetailTiers = isTrans 
+    ? { t1: '$10 Copay', t2: '$20 Copay', t3: '$35 Copay', t4: '$35 Copay' }
+    : { t1: '$10 Copay', t2: '$25 Copay', t3: '$40 Copay', t4: '$100 Copay' };
+    
+  const rxMailTiers = isTrans
+    ? { t1: '$20 Copay', t2: '$40 Copay', t3: '$80 Copay' }
+    : { t1: '$20 Copay', t2: '$50 Copay', t3: '$80 Copay' };
+    
+  listItems.push({ name: '💊 Rx Tier 1 (Generic) - 30d Retail', value: rxRetailTiers.t1, category: 'rx' });
+  listItems.push({ name: '💊 Rx Tier 2 (Preferred Brand) - 30d Retail', value: rxRetailTiers.t2, category: 'rx' });
+  listItems.push({ name: '💊 Rx Tier 3 (Non-Preferred) - 30d Retail', value: rxRetailTiers.t3, category: 'rx' });
+  listItems.push({ name: '💊 Rx Tier 4 (Specialty) - 30d Retail', value: rxRetailTiers.t4, category: 'rx' });
+  listItems.push({ name: '💊 Mail Order Rx Tier 1 (Generic) - 90d Mail', value: rxMailTiers.t1, category: 'rx' });
+  listItems.push({ name: '💊 Mail Order Rx Tier 2 (Preferred Brand) - 90d Mail', value: rxMailTiers.t2, category: 'rx' });
+  listItems.push({ name: '💊 Mail Order Rx Tier 3 (Non-Preferred) - 90d Mail', value: rxMailTiers.t3, category: 'rx' });
+  
+  // Add Dental status
+  const isSupport = group === 'support_12' || group === 'support_10';
+  if (isSupport) {
+    listItems.push({ name: '🦷 Dental Coverage (Guardian PPO)', value: 'Not Offered for Support Group', category: 'dental' });
+  } else {
+    listItems.push({ name: '🦷 Dental Coverage (Guardian PPO)', value: 'Included (100% Preventive / $2k Max)', category: 'dental' });
+  }
+  
+  // Add Vision status (EyeMed)
+  listItems.push({ name: '👁️ Routine Eye Exam (EyeMed)', value: '$10 Copay ($0 at PLUS Providers)', category: 'vision' });
+  listItems.push({ name: '👁️ Lenses Routine (EyeMed Single)', value: '$25 Copay', category: 'vision' });
+  listItems.push({ name: '👁️ Frames Allowance (EyeMed)', value: '$130 Allowance ($180 at PLUS Providers)', category: 'vision' });
+  
+  // Filter items based on search input
+  const filteredItems = listItems.filter(item => 
+    item.name.toLowerCase().includes(filter) || 
+    item.value.toLowerCase().includes(filter) ||
+    item.category.toLowerCase().includes(filter)
+  );
+  
+  if (filteredItems.length === 0) {
+    cheatListContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin: 1.5rem 0;">No matching copays found. Try searching another term!</div>`;
+    return;
+  }
+  
+  // Render
+  filteredItems.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'cheat-item';
+    row.innerHTML = `
+      <span class="cheat-item-name">${item.name}</span>
+      <span class="cheat-item-value">${item.value}</span>
+    `;
+    cheatListContainer.appendChild(row);
+  });
+}
+
+function getBenefitName(key) {
+  const names = {
+    pcp: '🩺 Primary Care Visit (PCP)',
+    spec: '👤 Specialist Office Visit',
+    inpatient: '🏥 Inpatient Hospital Stay',
+    outpatient: '🔪 Outpatient Surgery',
+    er: '🚨 Emergency Room Care',
+    urgent: '⚡ Urgent Care Visit',
+    therapy: '💪 Physical / Occup / Speech Therapy',
+    chiro: '🦴 Chiropractic Care',
+    xray: '🩻 Routine X-Ray Services',
+    lab: '🧪 Routine Lab Work',
+    imaging: '🌀 Complex Imaging (MRI, CT, PET)'
+  };
+  return names[key] || key;
+}
+
 btnResetRates.addEventListener('click', () => {
   premiumRates = JSON.parse(JSON.stringify(DEFAULT_PREMIUM_RATES));
   sharePcts = JSON.parse(JSON.stringify(DEFAULT_SHARE_PCTS));

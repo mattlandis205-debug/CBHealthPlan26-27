@@ -1044,3 +1044,73 @@ tr:hover td {
 .risk-details[open] summary::after, .descriptor-details[open] summary::after {
   transform: rotate(180deg);
 }
+
+/* Cheat Sheet Modal Styles */
+.cheat-tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cheat-tab-btn {
+  padding: 0.5rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.cheat-tab-btn:hover {
+  color: var(--accent-indigo);
+}
+
+.cheat-tab-btn.active {
+  color: var(--accent-indigo);
+  border-bottom-color: var(--accent-indigo);
+}
+
+.cheat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.cheat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.55rem 0.75rem;
+  background: rgba(15, 23, 42, 0.02);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(15, 23, 42, 0.04);
+}
+
+.cheat-item-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cheat-item-value {
+  font-size: 0.775rem;
+  font-weight: 700;
+  color: var(--accent-indigo);
+  background: rgba(99, 102, 241, 0.08);
+  padding: 0.15rem 0.45rem;
+  border-radius: 100px;
+  text-align: right;
+  white-space: nowrap;
+}
