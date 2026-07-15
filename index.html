@@ -304,6 +304,46 @@
     </div>
   </div>
 
+  <!-- Floating AI Benefits Assistant -->
+  <button class="chat-widget-btn" id="chat-toggle-btn" aria-label="Open Benefits AI Assistant">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+    </svg>
+  </button>
+
+  <div class="chat-window" id="chat-window">
+    <div class="chat-header">
+      <div class="chat-bot-info">
+        <span class="chat-bot-status"></span>
+        <span class="chat-header-title">CBSD Benefits AI Assistant</span>
+      </div>
+      <button class="chat-close-btn" id="chat-close-btn" aria-label="Close Chat">&times;</button>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-msg bot">
+        Hello! I am your <b>CBSD Benefits Assistant</b>. 
+        I can help answer questions or compare scenarios for the 2026-27 healthcare plans based directly on the official contract documents.
+        <br><br>
+        Ask me anything, or select a scenario below to start!
+      </div>
+    </div>
+    <div class="chat-quick-questions">
+      <button class="chat-quick-btn" data-q="Which plan has the lowest premium?">💰 Lowest Premium?</button>
+      <button class="chat-quick-btn" data-q="What is the deductible for Open Choice 3?">🛡️ Choice 3 Deductible?</button>
+      <button class="chat-quick-btn" data-q="Is dental offered to Support Staff?">🦷 Support Staff Dental?</button>
+      <button class="chat-quick-btn" data-q="How are X-Rays covered under Open Choice 2 vs 3?">🩻 X-Ray Comparison</button>
+      <button class="chat-quick-btn" data-q="Explain the Transportation 1080 hours rule">🚌 Under 1080 Hours?</button>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" class="chat-input" id="chat-input" placeholder="Ask a question or describe a scenario..." aria-label="Chat input">
+      <button class="chat-send-btn" id="chat-send-btn" aria-label="Send message">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>

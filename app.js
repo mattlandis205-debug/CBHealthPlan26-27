@@ -943,3 +943,201 @@ renderExplorer();
 
 // Trigger a selectGroup change on start to hide OC1 by default for CBEA
 selectGroup.dispatchEvent(new Event('change'));
+
+// ==========================================
+// 13. Floating Benefits AI Assistant Logic
+// ==========================================
+
+function generateBotResponse(userInput) {
+  const query = userInput.toLowerCase().trim();
+  
+  // 1. Cheapest / Lowest Premium
+  if (query.includes('cheap') || query.includes('lowest premium') || query.includes('save money') || query.includes('cheapest') || query.includes('save on premium')) {
+    return `💰 <b>Lowest Premium Option: Open Choice 3</b><br>
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>Premium Cost:</b> Open Choice 3 has the lowest monthly employee premiums (often $0 depending on your bargaining group).</li>
+      <li><b>The Catch:</b> It has an in-network deductible of <b>$1,100 (Individual) / $2,200 (Family)</b>. You must pay 100% of diagnostic costs (like standard X-Rays, Lab work, and MRIs/CT scans) out-of-pocket until you meet this deductible.</li>
+      <li><b>Gist:</b> Excellent if you are healthy and want to save on monthly deductions, but carries upfront out-of-pocket risk for medical tests.</li>
+    </ul>`;
+  }
+  
+  // 2. Open Access
+  if (query.includes('open access') || query.includes(' oa ') || query === 'oa') {
+    return `🚀 <b>Open Access Plan ("Best Bang for Your Buck")</b><br>
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>Premium Cost:</b> Higher monthly premium deductions than Choice 3.</li>
+      <li><b>Benefit:</b> <b>$0 Deductible</b> in-network. You only pay flat copays for visits ($15 PCP, $25 specialist) and diagnostics are 100% covered immediately ($0).</li>
+      <li><b>Gist:</b> Best predictability. If you go to the doctor often or want zero financial surprise at the clinic, this plan offers the greatest value.</li>
+    </ul>`;
+  }
+
+  // 3. Open Choice 2
+  if (query.includes('choice 2') || query.includes('oc2') || query.includes('mercedes')) {
+    return `🚗 <b>Open Choice 2 ("The Mercedes Plan")</b><br>
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>Premium Cost:</b> Moderate monthly premiums.</li>
+      <li><b>Benefit:</b> Features flat copays for all primary services ($20 PCP, $40 specialist, $350 hospital stays) with <b>$0 in-network deductible</b>.</li>
+      <li><b>Gist:</b> A very comprehensive plan with solid safety, but check if Open Access or Choice 3 might suit you better for a lower premium.</li>
+    </ul>`;
+  }
+
+  // 4. Open Choice 1
+  if (query.includes('choice 1') || query.includes('oc1')) {
+    return `✨ <b>Open Choice 1 ("The Premium Classic")</b><br>
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>Availability:</b> Eliminated for Teachers (CBEA) and Transportation, but available for Act 93, Confidentials, and Support Staff.</li>
+      <li><b>Benefit:</b> $0 in-network deductible, $10 PCP, $20 Specialist, and unique $75/day daily hospital copays (max $375).</li>
+    </ul>`;
+  }
+
+  // 5. Deductible Comparison
+  if (query.includes('deductible') || query.includes('deductibles')) {
+    return `🛡️ <b>In-Network Deductible Comparison:</b><br>
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>Open Access:</b> $0 Deductible</li>
+      <li><b>Open Choice 1:</b> $0 Deductible</li>
+      <li><b>Open Choice 2:</b> $0 Deductible</li>
+      <li><b>Open Choice 3:</b> $1,100 (Individual) / $2,200 (Family)</li>
+    </ul>
+    <p style="margin-top: 0.35rem; font-size: 0.75rem; font-style: italic;">Note: For Open Choice 3, you pay 100% of diagnostic services (X-rays, labs, imaging, etc.) out-of-pocket until the deductible is met. All other plans cover diagnostics immediately with no deductible.</p>`;
+  }
+
+  // 6. X-Rays / Imaging / Diagnostics
+  if (query.includes('x-ray') || query.includes('xray') || query.includes('scan') || query.includes('mri') || query.includes('imaging') || query.includes('lab') || query.includes('laboratory') || query.includes('diagnostic')) {
+    return `🩻 <b>Diagnostic & Imaging Coverage:</b><br>
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>Open Access:</b> 100% Covered ($0 cost) immediately.</li>
+      <li><b>Open Choice 1:</b> $20 Copay (Labs 100% covered).</li>
+      <li><b>Open Choice 2:</b> $40 Copay for X-Rays, $20 Copay for Complex Imaging/MRIs (Labs 100% covered).</li>
+      <li><b>Open Choice 3:</b> <b>100% Covered ONLY after meeting the deductible</b> ($1,100 Ind / $2,200 Fam). You pay full allowed cost until then.</li>
+    </ul>`;
+  }
+
+  // 7. Dental Availability
+  if (query.includes('dental') || query.includes('teeth')) {
+    return `🦷 <b>Voluntary Dental Plan Rules:</b><br>
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>Support Staff:</b> Dental is <b>not offered</b> to Support Staff (10 or 12 month) under the district contract.</li>
+      <li><b>Teachers (CBEA):</b> Available voluntary dental rate is $8.00 (Single), $16.00 (2-Party), or $24.00 (Family).</li>
+      <li><b>Others:</b> Available for Act 93, Confidentials, and Transportation as a voluntary monthly add-on.</li>
+    </ul>`;
+  }
+
+  // 8. Vision / Eye Med
+  if (query.includes('vision') || query.includes('eye') || query.includes('glasses') || query.includes('eyemed')) {
+    return `👁️ <b>Voluntary Vision (Eye Med) Rates:</b><br>
+    Available voluntary vision is offered to all employee groups at:
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>Single:</b> $5.62 / month</li>
+      <li><b>2-Party:</b> $10.68 / month</li>
+      <li><b>Family:</b> $15.69 / month</li>
+    </ul>`;
+  }
+
+  // 9. Transportation Hours Rule
+  if (query.includes('1080') || query.includes('hours') || query.includes('transportation rule') || query.includes('under 1080')) {
+    return `🚌 <b>Transportation (10-Month) under 1080 Hours Rule:</b><br>
+    If you are a 10-Month Transportation employee working under 1080 hours per year:
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li>You are <b>not eligible</b> for the Open Access plan.</li>
+      <li>Your Open Choice 3 rates automatically scale to higher employee-share premium rates.</li>
+    </ul>`;
+  }
+
+  // 10. Out of Network
+  if (query.includes('network') || query.includes('out-of-network') || query.includes('oon') || query.includes('in-network')) {
+    return `🏥 <b>In-Network vs. Out-of-Network:</b><br>
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>In-Network:</b> Standard copays and 100% covered preventative care.</li>
+      <li><b>Out-of-Network:</b> Subject to deductibles first, then coinsurance splits:
+        <ul>
+          <li>Open Access & Choice 3: 50% member coinsurance.</li>
+          <li>Choice 1 & Choice 2: 70% member coinsurance.</li>
+        </ul>
+      </li>
+      <li><b>Warning:</b> Out-of-network providers may balance-bill you for costs exceeding the allowed amount.</li>
+    </ul>`;
+  }
+
+  // Default fallback
+  return `❓ <b>I can help you with specific benefits details!</b><br>
+  Try asking about:<br>
+  • Deductibles or Out-of-Pocket Maximums<br>
+  • PCP or Specialist office visit copays<br>
+  • How X-Rays or MRIs are covered<br>
+  • Dental eligibility for Support Staff<br>
+  • Transportation 1080 hours rule`;
+}
+
+// Floating Chat Helper Logic
+const chatToggleBtn = document.getElementById('chat-toggle-btn');
+const chatCloseBtn = document.getElementById('chat-close-btn');
+const chatWindow = document.getElementById('chat-window');
+const chatMessages = document.getElementById('chat-messages');
+const chatInput = document.getElementById('chat-input');
+const chatSendBtn = document.getElementById('chat-send-btn');
+const chatQuickBtns = document.querySelectorAll('.chat-quick-btn');
+
+if (chatToggleBtn && chatWindow) {
+  chatToggleBtn.addEventListener('click', () => {
+    chatWindow.classList.toggle('active');
+    if (chatWindow.classList.contains('active') && chatInput) {
+      chatInput.focus();
+    }
+  });
+}
+
+if (chatCloseBtn && chatWindow) {
+  chatCloseBtn.addEventListener('click', () => {
+    chatWindow.classList.remove('active');
+  });
+}
+
+function appendMessage(sender, text) {
+  const msgDiv = document.createElement('div');
+  msgDiv.className = `chat-msg ${sender}`;
+  msgDiv.innerHTML = text;
+  if (chatMessages) {
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+}
+
+function handleUserMessage() {
+  if (!chatInput) return;
+  const text = chatInput.value.trim();
+  if (!text) return;
+  
+  appendMessage('user', text);
+  chatInput.value = '';
+  
+  // Simulated bot typing response
+  setTimeout(() => {
+    const reply = generateBotResponse(text);
+    appendMessage('bot', reply);
+  }, 400);
+}
+
+if (chatSendBtn) {
+  chatSendBtn.addEventListener('click', handleUserMessage);
+}
+
+if (chatInput) {
+  chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      handleUserMessage();
+    }
+  });
+}
+
+chatQuickBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const question = btn.dataset.q;
+    appendMessage('user', question);
+    
+    setTimeout(() => {
+      const reply = generateBotResponse(question);
+      appendMessage('bot', reply);
+    }, 300);
+  });
+});
