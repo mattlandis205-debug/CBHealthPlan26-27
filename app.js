@@ -643,6 +643,11 @@ function renderExplorer() {
       desc: "Overnight hospital admissions for medical treatments, surgeries, or childbirth.",
       note: "For OC1: $75 copay per day (max $375 per admission). Others charge a flat copay per stay."
     },
+    birth: {
+      title: "👶 Giving Birth (Maternity/Childbirth)",
+      desc: "Inpatient hospital stay and delivery services for childbirth.",
+      note: "Covers the hospital room, labor & delivery services for both mother and child. On Choice 3, the deductible applies first (which typically matches the family tier once the child is born)."
+    },
     outpatient: {
       title: "🔪 Outpatient Surgery",
       desc: "Surgeries performed at ambulatory surgery centers or hospital outpatient clinics.",
@@ -706,7 +711,8 @@ function renderExplorer() {
     if (isEliminated) return; // Hide card for plans not offered to this group
     
     let inText = '';
-    const inVal = plan.in[activeBenefit];
+    const benefitKey = activeBenefit === 'birth' ? 'inpatient' : (activeBenefit === 'chiro' ? 'chiro_copay' : activeBenefit);
+    const inVal = plan.in[benefitKey];
     
     if (activeBenefit === 'preventive') {
       inText = '100% Covered ($0)';
@@ -725,6 +731,10 @@ function renderExplorer() {
     } else if (activeBenefit === 'inpatient') {
       if (planId === 'oc1') inText = '$75 / day<br>(max $375 per stay)';
       else inText = `$${inVal} Copay per stay`;
+    } else if (activeBenefit === 'birth') {
+      if (planId === 'oc1') inText = '$75 / day<br>(max $375 per stay)';
+      else if (planId === 'oc3') inText = `$${inVal} Copay per stay<br><span style="font-size: 0.725rem; opacity: 0.85;">(Subject to Deductible)</span>`;
+      else inText = `$${inVal} Copay per stay<br><span style="font-size: 0.725rem; opacity: 0.85;">(Deductible: $0)</span>`;
     } else if (activeBenefit === 'er') {
       inText = `$${inVal} Copay<br>(waived if admitted)`;
     } else if (activeBenefit === 'chiro') {

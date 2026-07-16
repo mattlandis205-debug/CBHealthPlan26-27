@@ -1114,3 +1114,56 @@ tr:hover td {
   text-align: right;
   white-space: nowrap;
 }
+
+/* Benefit Explorer Buttons Grid overrides */
+.explorer-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.explorer-buttons-grid .btn-preset {
+  background: var(--bg-tertiary);
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  padding: 0.45rem 0.2rem;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.explorer-buttons-grid .btn-preset.active,
+.explorer-buttons-grid .btn-preset:hover {
+  background: var(--accent-indigo) !important;
+  color: white !important;
+  border-color: var(--accent-indigo) !important;
+}
+
+@media (min-width: 576px) {
+  .explorer-buttons-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .explorer-buttons-grid .btn-preset {
+    font-size: 0.775rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .explorer-buttons-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .explorer-buttons-grid {
+    grid-template-columns: repeat(7, 1fr); /* 2 rows for 13 buttons! */
+  }
+}
