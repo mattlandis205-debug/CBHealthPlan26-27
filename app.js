@@ -311,7 +311,7 @@ const PLAN_BENEFITS = {
       therapy_copay: 25, // 1-30: 25, 31-60: 50
       therapy_limit: 60,
       chiro_copay: 50,
-      chiro_limit: 100,
+      chiro_limit: 30,
       xray: 0.0, // 0% coinsurance after deductible (subject to deductible)
       lab: 0.0, // 0% coinsurance after deductible (subject to deductible)
       imaging: 0.0 // 0% coinsurance after deductible (subject to deductible)
@@ -605,6 +605,17 @@ function updatePremiumDisplay() {
     
     container.innerHTML += cardHTML;
   });
+
+  // Update SBC document links visibility based on active group
+  const sbcLinkOa = document.getElementById('sbc-link-oa');
+  const sbcLinkOc1 = document.getElementById('sbc-link-oc1');
+  const sbcLinkOc2 = document.getElementById('sbc-link-oc2');
+  const sbcLinkOc3 = document.getElementById('sbc-link-oc3');
+
+  if (sbcLinkOa) sbcLinkOa.style.display = sharePcts[group].oa === null ? 'none' : '';
+  if (sbcLinkOc1) sbcLinkOc1.style.display = sharePcts[group].oc1 === null ? 'none' : '';
+  if (sbcLinkOc2) sbcLinkOc2.style.display = sharePcts[group].oc2 === null ? 'none' : '';
+  if (sbcLinkOc3) sbcLinkOc3.style.display = sharePcts[group].oc3 === null ? 'none' : '';
 }
 
 // 9. Interactive Benefits Explorer & Slider Reset
@@ -626,12 +637,12 @@ function renderExplorer() {
     pcp: {
       title: "🩺 Primary Care (PCP) Visit",
       desc: "Visits to your family doctor, pediatrician, or general practitioner.",
-      note: "No deductible applies in-network for any plan. You just pay the flat copay."
+      note: "No deductible applies in-network for any plan. You just pay the flat copay. General medical telemedicine services via Teladoc are available on all plans (consult fee/copay applies)."
     },
     specialist: {
       title: "🥼 Specialist Visit",
       desc: "Visits to medical specialists (e.g. cardiologists, dermatologists, orthopedists).",
-      note: "No referral is required to see a specialist. No deductible applies in-network."
+      note: "No referral is required to see a specialist. No deductible applies in-network. Behavioral health telemedicine services via Teladoc are available."
     },
     preventive: {
       title: "🛡️ Preventive Care & Wellness",
@@ -641,7 +652,7 @@ function renderExplorer() {
     inpatient: {
       title: "🏥 Inpatient Hospital Stay",
       desc: "Overnight hospital admissions for medical treatments, surgeries, or childbirth.",
-      note: "For OC1: $75 copay per day (max $375 per admission). Others charge a flat copay per stay."
+      note: "For OC1: $75 copay per day (max $375 per admission). Others charge a flat copay per stay. Preauthorization is required for out-of-network admissions."
     },
     birth: {
       title: "👶 Giving Birth (Maternity/Childbirth)",
@@ -651,7 +662,7 @@ function renderExplorer() {
     outpatient: {
       title: "🔪 Outpatient Surgery",
       desc: "Surgeries performed at ambulatory surgery centers or hospital outpatient clinics.",
-      note: "Subject to a flat copay. You do not need to meet the deductible first."
+      note: "Subject to a flat copay or coinsurance. You do not need to meet the deductible first."
     },
     er: {
       title: "🚨 Emergency Room Visit",
@@ -666,12 +677,12 @@ function renderExplorer() {
     therapy: {
       title: "💪 Physical / Occupational / Speech Therapy",
       desc: "Outpatient rehabilitative therapy visits to restore or improve bodily functions.",
-      note: "Open Access is 100% covered. Other plans have visit tiers (Copay increases after visit 30)."
+      note: "Open Access: 100% Covered ($0 copay), limited to 60 visits per incident. Other plans: Tiered copays (e.g. visits 1-30 vs 31-60), limited to 60 visits combined per benefit period."
     },
     chiro: {
       title: "🦴 Chiropractic Care",
       desc: "Spinal adjustments and manual therapy sessions.",
-      note: "Subject to copays or coinsurance depending on plan. Limit of visits applies per the SPD."
+      note: "Open Access: 100% Covered ($0 copay), limited to 100 visits per benefit period. Other plans: Flat copays ($20 for OC1, $40 for OC2, $50 for OC3), limited to 30 visits per benefit period."
     },
     xray: {
       title: "🩻 Diagnostic X-Ray",
