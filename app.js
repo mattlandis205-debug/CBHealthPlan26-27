@@ -684,6 +684,11 @@ function renderExplorer() {
       desc: "Spinal adjustments and manual therapy sessions.",
       note: "Open Access: 100% Covered ($0 copay), limited to 100 visits per benefit period. Other plans: Flat copays ($20 for OC1, $40 for OC2, $50 for OC3), limited to 30 visits per benefit period."
     },
+    acupuncture: {
+      title: "⚕️ Acupuncture Services",
+      desc: "Acupuncture treatments performed by licensed acupuncturists for pain relief or therapeutic care.",
+      note: "Covered across all four plans in-network. Subject to the Specialist copay."
+    },
     xray: {
       title: "🩻 Diagnostic X-Ray",
       desc: "Standard diagnostic imaging such as chest X-rays or bone scans.",
@@ -722,7 +727,7 @@ function renderExplorer() {
     if (isEliminated) return; // Hide card for plans not offered to this group
     
     let inText = '';
-    const benefitKey = activeBenefit === 'birth' ? 'inpatient' : (activeBenefit === 'chiro' ? 'chiro_copay' : activeBenefit);
+    const benefitKey = activeBenefit === 'birth' ? 'inpatient' : (activeBenefit === 'chiro' ? 'chiro_copay' : (activeBenefit === 'acupuncture' ? 'specialist' : activeBenefit));
     const inVal = plan.in[benefitKey];
     
     if (activeBenefit === 'preventive') {
@@ -752,6 +757,8 @@ function renderExplorer() {
       const chiroVal = plan.in.chiro_copay;
       if (chiroVal === 0) inText = '100% Covered<br><span style="font-size: 0.7rem; opacity: 0.8;">(See SPD for details)</span>';
       else inText = `$${chiroVal} Copay<br><span style="font-size: 0.7rem; opacity: 0.8;">(See SPD for details)</span>`;
+    } else if (activeBenefit === 'acupuncture') {
+      inText = `$${inVal} Copay<br><span style="font-size: 0.7rem; opacity: 0.8;">(Specialist Copay)</span>`;
     } else if (inVal === 0) {
       inText = '100% Covered ($0)';
     } else if (inVal !== null) {
