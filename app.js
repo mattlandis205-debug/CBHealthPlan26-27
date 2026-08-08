@@ -1468,6 +1468,18 @@ function generateBotResponse(userInput) {
     </ul>`;
   }
 
+  // 16. Acupuncture & Other Covered Services
+  if (query.includes('acupuncture') || query.includes('bariatric') || query.includes('infertility') || query.includes('private duty') || query.includes('nursing') || query.includes('chiropractic') || query.includes('chiro')) {
+    return `⚕️ <b>Acupuncture & Other Covered Services:</b><br>
+    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+      <li><b>Acupuncture:</b> Covered in-network across all four plans (limitations or preauthorization may apply).</li>
+      <li><b>Chiropractic Care:</b> Covered in-network (100 visits/yr for Open Access; 30 visits/yr for Choice 1, 2, & 3).</li>
+      <li><b>Bariatric Surgery:</b> Covered in-network on all plans (limited to 1 procedure per lifetime).</li>
+      <li><b>Private-Duty Nursing:</b> Covered in-network (limited to 45 shifts of 8 hours per plan year).</li>
+      <li><b>Infertility Treatment:</b> Covered in-network on Open Access (limitations apply); check your plan SBC or contact HR for coverage details on Choice plans.</li>
+    </ul>`;
+  }
+
   // Default fallback
   return `❓ <b>I can help you with specific benefits details!</b><br>
   Try asking about:<br>
@@ -1475,7 +1487,8 @@ function generateBotResponse(userInput) {
   • PCP or Specialist office visit copays<br>
   • How X-Rays or MRIs are covered<br>
   • Dental eligibility for Support Staff<br>
-  • Transportation 1080 hours rule`;
+  • Transportation 1080 hours rule<br>
+  • Acupuncture, bariatric, or private duty nursing coverage`;
 }
 
 // Floating Chat Helper Logic
