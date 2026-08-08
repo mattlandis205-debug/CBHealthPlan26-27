@@ -758,7 +758,7 @@ function renderExplorer() {
       if (chiroVal === 0) inText = '100% Covered<br><span style="font-size: 0.7rem; opacity: 0.8;">(See SPD for details)</span>';
       else inText = `$${chiroVal} Copay<br><span style="font-size: 0.7rem; opacity: 0.8;">(See SPD for details)</span>`;
     } else if (activeBenefit === 'acupuncture') {
-      inText = 'Covered<br><span style="font-size: 0.675rem; line-height: 1.35; display: inline-block; opacity: 0.85; font-weight: 500;">Covered in-network; limitations may apply. Contact Luminare directly to inquire.</span>';
+      inText = '<span style="font-size: 0.775rem; font-weight: 500; color: var(--text-secondary); line-height: 1.45; display: block;">Covered in-network; limitations may apply. Contact Luminare directly to inquire.</span>';
     } else if (inVal === 0) {
       inText = '100% Covered ($0)';
     } else if (inVal !== null) {
