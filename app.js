@@ -343,7 +343,15 @@ const selectTier = document.getElementById('coverage-tier');
 const toggleNetwork = document.getElementById('toggle-network');
 const networkStatusText = document.getElementById('network-status-text');
 const toggleVision = document.getElementById('toggle-vision');
+const toggleDental = document.getElementById('toggle-dental');
+const dentalToggleText = document.getElementById('dental-toggle-text');
 const toggleHours = document.getElementById('toggle-hours');
+const darkModeToggle = document.getElementById('dark-mode-toggle');
+
+const btnOpenCompare = document.getElementById('btn-compare-matrix');
+const btnCloseCompare = document.getElementById('btn-close-compare');
+const compareModal = document.getElementById('compare-modal');
+const compareMatrixTable = document.getElementById('compare-matrix-table');
 
 // Check plan availability and generate premium cards
 function updatePremiumDisplay() {
@@ -616,6 +624,10 @@ function updatePremiumDisplay() {
   if (sbcLinkOc1) sbcLinkOc1.style.display = sharePcts[group].oc1 === null ? 'none' : '';
   if (sbcLinkOc2) sbcLinkOc2.style.display = sharePcts[group].oc2 === null ? 'none' : '';
   if (sbcLinkOc3) sbcLinkOc3.style.display = sharePcts[group].oc3 === null ? 'none' : '';
+  
+  if (typeof calculateSimulator === 'function') {
+    calculateSimulator();
+  }
 }
 
 // 9. Interactive Benefits Explorer & Slider Reset
@@ -1209,6 +1221,698 @@ btnResetRates.addEventListener('click', () => {
   loadModalFields();
 });
 
+// ============================================================================
+// Cost Simulation and Dynamic Visuals Calculation Engine
+// ============================================================================
+
+const presets = {
+  low: { pcp: 1, specialist: 0, urgent: 0, er: 0, inpatient: 0, inpatient_days: 0, outpatient: 0, therapy: 0, chiro: 0, xray: 0, lab: 2, imaging: 0, rx_generic: 0, rx_brand: 0 },
+  mod: { pcp: 4, specialist: 2, urgent: 1, er: 0, inpatient: 0, inpatient_days: 0, outpatient: 0, therapy: 10, chiro: 4, xray: 2, lab: 4, imaging: 1, rx_generic: 6, rx_brand: 1 },
+  high: { pcp: 10, specialist: 8, urgent: 2, er: 1, inpatient: 1, inpatient_days: 4, outpatient: 1, therapy: 30, chiro: 12, xray: 4, lab: 12, imaging: 2, rx_generic: 24, rx_brand: 6 }
+};
+
+function calculatePlanCosts(planId) {
+  const group = selectGroup.value;
+  const tier = selectTier.value;
+  
+  const sharePct = sharePcts[group] ? sharePcts[group][planId] : null;
+  const baseRates = premiumRates[group] ? premiumRates[group][planId] : null;
+  const hoursToggle = document.getElementById('toggle-hours');
+  const isUnder1080 = group === 'transportation_10' && hoursToggle && hoursToggle.checked;
+  
+  if (sharePct === null || !baseRates || baseRates[tier] === 0) {
+    return { fixed: 0, premiumOnly: 0, voluntaryOnly: 0, oop: 0, medicalOop: 0, rxOop: 0, total: 0, isEliminated: true };
+  }
+  
+  let baseRate = baseRates[tier];
+  let actualSharePct = sharePct;
+  
+  if (isUnder1080) {
+    if (planId === 'oc3') {
+      baseRate = transUnder1080Rates[planId][tier];
+      actualSharePct = 100;
+    } else {
+      return { fixed: 0, premiumOnly: 0, voluntaryOnly: 0, oop: 0, medicalOop: 0, rxOop: 0, total: 0, isEliminated: true };
+    }
+  }
+  
+  const annualPremium = (baseRate * actualSharePct / 100) * 12;
+  
+  // Voluntary add-ons
+  const isVision = toggleVision.checked;
+  const visionCost = isVision ? visionRates[tier] * 12 : 0;
+  
+  const isSupportGroup = group === 'support_12' || group === 'support_10';
+  const isDental = toggleDental && toggleDental.checked && !isSupportGroup && dentalRates[group];
+  const dentalCost = isDental ? dentalRates[group][tier] * 12 : 0;
+  const fixedVoluntary = visionCost + dentalCost;
+  
+  // Slider inputs
+  const pcp = parseInt(document.getElementById('slide-pcp').value) || 0;
+  const specialist = parseInt(document.getElementById('slide-specialist').value) || 0;
+  const urgent = parseInt(document.getElementById('slide-urgent').value) || 0;
+  const er = parseInt(document.getElementById('slide-er').value) || 0;
+  const inpatient = parseInt(document.getElementById('slide-inpatient').value) || 0;
+  const inpatientDays = parseInt(document.getElementById('slide-inpatient-days').value) || 0;
+  const outpatient = parseInt(document.getElementById('slide-outpatient').value) || 0;
+  const therapy = parseInt(document.getElementById('slide-therapy').value) || 0;
+  const chiro = parseInt(document.getElementById('slide-chiro').value) || 0;
+  const xray = parseInt(document.getElementById('slide-xray').value) || 0;
+  const lab = parseInt(document.getElementById('slide-lab').value) || 0;
+  const imaging = parseInt(document.getElementById('slide-imaging').value) || 0;
+  const rxGeneric = parseInt(document.getElementById('slide-rx-generic').value) || 0;
+  const rxBrand = parseInt(document.getElementById('slide-rx-brand').value) || 0;
+  
+  const isOutOfNetwork = toggleNetwork.checked;
+  const planData = PLAN_BENEFITS[planId];
+  
+  let medicalOop = 0;
+  let rxOop = 0;
+  
+  if (isOutOfNetwork) {
+    const ded_ind = planData.out.deductible_ind;
+    const ded_fam = planData.out.deductible_fam;
+    const oop_ind = planData.out.oop_max_ind;
+    const oop_fam = planData.out.oop_max_fam;
+    const coinsurance_pct = planData.out.coinsurance;
+    
+    const active_ded = tier === 'individual' ? ded_ind : ded_fam;
+    const active_oop_max = tier === 'individual' ? oop_ind : oop_fam;
+    
+    const allowed_pcp = pcp * 150;
+    const allowed_spec = specialist * 250;
+    const allowed_urg = urgent * 200;
+    const allowed_inp = inpatient * 5000 + inpatientDays * 800;
+    const allowed_out = outpatient * 3000;
+    const allowed_ther = therapy * 150;
+    const allowed_chiro = chiro * 80;
+    const allowed_xray = xray * 200;
+    const allowed_lab = lab * 60;
+    const allowed_img = imaging * 900;
+    
+    const total_allowed_ex_er = allowed_pcp + allowed_spec + allowed_urg + allowed_inp + allowed_out + allowed_ther + allowed_chiro + allowed_xray + allowed_lab + allowed_img;
+    
+    const ded_paid = Math.min(active_ded, total_allowed_ex_er);
+    const coins_basis = Math.max(0, total_allowed_ex_er - ded_paid);
+    const coins_paid = coins_basis * coinsurance_pct;
+    
+    const er_cost = er * 100; // in-network ER copay applies to OON ER
+    medicalOop = ded_paid + coins_paid + er_cost;
+    
+    const rxRetailTiers = (group === 'transportation_12' || group === 'transportation_10')
+      ? { generic: 10, brand: 27.5 }
+      : { generic: 10, brand: 32.5 };
+    rxOop = (rxGeneric * rxRetailTiers.generic) + (rxBrand * rxRetailTiers.brand);
+    
+    const totalOop = medicalOop + rxOop;
+    const cappedOop = Math.min(active_oop_max, totalOop);
+    
+    if (totalOop > 0) {
+      medicalOop = (medicalOop / totalOop) * cappedOop;
+      rxOop = (rxOop / totalOop) * cappedOop;
+    }
+  } else {
+    // In-Network
+    const active_oop_max = tier === 'individual' ? planData.in.oop_max_ind : planData.in.oop_max_fam;
+    
+    if (planId === 'oa') {
+      medicalOop = (pcp * 15) + (specialist * 25) + (urgent * 24) + (er * 100) + (inpatient * 250) + (outpatient * 100);
+      rxOop = (rxGeneric * 10) + (rxBrand * 32.5);
+    } else if (planId === 'oc1') {
+      const inpatient_cost = Math.min(inpatient * 375, inpatientDays * 75);
+      
+      const ther_first30 = Math.min(therapy, 30);
+      const ther_next30 = Math.max(0, Math.min(therapy - 30, 30));
+      const ther_beyond = Math.max(0, therapy - 60);
+      const therapy_cost = (ther_first30 * 15) + (ther_next30 * 25) + (ther_beyond * 150);
+      
+      const chiro_first30 = Math.min(chiro, 30);
+      const chiro_beyond = Math.max(0, chiro - 30);
+      const chiro_cost = (chiro_first30 * 20) + (chiro_beyond * 80);
+      
+      medicalOop = (pcp * 10) + (specialist * 20) + (urgent * 28) + (er * 100) + inpatient_cost + (outpatient * 75) + therapy_cost + chiro_cost + (xray * 20) + (imaging * 20);
+      rxOop = (rxGeneric * 10) + (rxBrand * 32.5);
+    } else if (planId === 'oc2') {
+      const ther_first30 = Math.min(therapy, 30);
+      const ther_next30 = Math.max(0, Math.min(therapy - 30, 30));
+      const ther_beyond = Math.max(0, therapy - 60);
+      const therapy_cost = (ther_first30 * 20) + (ther_next30 * 40) + (ther_beyond * 150);
+      
+      const chiro_first30 = Math.min(chiro, 30);
+      const chiro_beyond = Math.max(0, chiro - 30);
+      const chiro_cost = (chiro_first30 * 40) + (chiro_beyond * 80);
+      
+      medicalOop = (pcp * 20) + (specialist * 40) + (urgent * 28) + (er * 100) + (inpatient * 350) + (outpatient * 200) + therapy_cost + chiro_cost + (xray * 40) + (imaging * 20);
+      rxOop = (rxGeneric * 10) + (rxBrand * 32.5);
+    } else if (planId === 'oc3') {
+      const active_ded = tier === 'individual' ? 1100 : 2200;
+      
+      const allowed_xray = xray * 200;
+      const allowed_lab = lab * 60;
+      const allowed_img = imaging * 900;
+      const subject_allowed = allowed_xray + allowed_lab + allowed_img;
+      const ded_paid = Math.min(active_ded, subject_allowed);
+      
+      const ther_first30 = Math.min(therapy, 30);
+      const ther_next30 = Math.max(0, Math.min(therapy - 30, 30));
+      const ther_beyond = Math.max(0, therapy - 60);
+      const therapy_cost = (ther_first30 * 25) + (ther_next30 * 50) + (ther_beyond * 150);
+      
+      const chiro_first30 = Math.min(chiro, 30);
+      const chiro_beyond = Math.max(0, chiro - 30);
+      const chiro_cost = (chiro_first30 * 50) + (chiro_beyond * 80);
+      
+      medicalOop = ded_paid + (pcp * 25) + (specialist * 50) + (urgent * 50) + (er * 100) + (inpatient * 300) + (outpatient * 200) + therapy_cost + chiro_cost;
+      rxOop = (rxGeneric * 10) + (rxBrand * 32.5);
+    }
+    
+    const totalOop = medicalOop + rxOop;
+    const cappedOop = Math.min(active_oop_max, totalOop);
+    
+    if (totalOop > 0) {
+      medicalOop = (medicalOop / totalOop) * cappedOop;
+      rxOop = (rxOop / totalOop) * cappedOop;
+    }
+  }
+  
+  return {
+    fixed: annualPremium + fixedVoluntary,
+    premiumOnly: annualPremium,
+    voluntaryOnly: fixedVoluntary,
+    oop: medicalOop + rxOop,
+    medicalOop: medicalOop,
+    rxOop: rxOop,
+    total: annualPremium + fixedVoluntary + medicalOop + rxOop,
+    isEliminated: false
+  };
+}
+
+function calculateSimulator() {
+  const group = selectGroup.value;
+  const tier = selectTier.value;
+  
+  const isSupportGroup = group === 'support_12' || group === 'support_10';
+  if (toggleDental) {
+    if (isSupportGroup) {
+      toggleDental.checked = false;
+      toggleDental.disabled = true;
+      if (dentalToggleText) {
+        dentalToggleText.textContent = "Voluntary Dental: Not Available for Support Group";
+        dentalToggleText.style.color = "var(--text-muted)";
+      }
+    } else {
+      toggleDental.disabled = false;
+      if (dentalToggleText) {
+        dentalToggleText.textContent = `Add Voluntary Dental (Guardian): +$${dentalRates[group] ? dentalRates[group][tier].toFixed(2) : '0.00'}/mo`;
+        dentalToggleText.style.color = "var(--text-primary)";
+      }
+    }
+  }
+  
+  const plans = ['oa', 'oc1', 'oc2', 'oc3'];
+  const activePlans = [];
+  const planCosts = {};
+  
+  plans.forEach(planId => {
+    const costs = calculatePlanCosts(planId);
+    planCosts[planId] = costs;
+    
+    const thCalc = document.getElementById('th-calc-' + planId);
+    const cells = [
+      document.getElementById('calc-' + planId + '-premium'),
+      document.getElementById('calc-' + planId + '-voluntary'),
+      document.getElementById('calc-' + planId + '-med-oop'),
+      document.getElementById('calc-' + planId + '-rx-oop'),
+      document.getElementById('calc-' + planId + '-total')
+    ];
+    
+    if (costs.isEliminated) {
+      if (thCalc) thCalc.style.display = 'none';
+      cells.forEach(c => { if (c) c.style.display = 'none'; });
+    } else {
+      activePlans.push(planId);
+      if (thCalc) thCalc.style.display = '';
+      cells.forEach(c => { if (c) c.style.display = ''; });
+      
+      if (cells[0]) cells[0].textContent = '$' + costs.premiumOnly.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      if (cells[1]) cells[1].textContent = '$' + costs.voluntaryOnly.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      if (cells[2]) cells[2].textContent = '$' + costs.medicalOop.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      if (cells[3]) cells[3].textContent = '$' + costs.rxOop.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      if (cells[4]) cells[4].textContent = '$' + costs.total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+  });
+  
+  renderCostChart(activePlans, planCosts);
+  renderComparisonMatrix();
+  
+  const recBanner = document.getElementById('rec-banner-container');
+  const recText = document.getElementById('rec-banner-text');
+  
+  if (activePlans.length > 0 && recBanner && recText) {
+    let bestPlan = activePlans[0];
+    let minCost = planCosts[bestPlan].total;
+    
+    activePlans.forEach(p => {
+      if (planCosts[p].total < minCost) {
+        minCost = planCosts[p].total;
+        bestPlan = p;
+      }
+    });
+    
+    let runnerUp = null;
+    let runnerUpCost = Infinity;
+    activePlans.forEach(p => {
+      if (p !== bestPlan && planCosts[p].total < runnerUpCost) {
+        runnerUpCost = planCosts[p].total;
+        runnerUp = p;
+      }
+    });
+    
+    const bestPlanName = PLAN_BENEFITS[bestPlan].name;
+    const savings = runnerUp ? (runnerUpCost - minCost) : 0;
+    
+    recBanner.style.display = 'flex';
+    
+    let recommendationHTML = `Based on your simulated medical and pharmacy usage, the <b>${bestPlanName}</b> plan offers the lowest total annual cost of <b>$${minCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b>.`;
+    
+    if (savings > 5) {
+      recommendationHTML += ` Choosing this plan could save you approximately <b>$${savings.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b> per year compared to the next best option (<b>${PLAN_BENEFITS[runnerUp].name}</b>).`;
+    }
+    
+    if (bestPlan === 'oc3' && activePlans.includes('oa')) {
+      const oaCost = planCosts.oa.total;
+      const oaPremiumDiff = planCosts.oa.premiumOnly - planCosts.oc3.premiumOnly;
+      recommendationHTML += `<br><span style="display: block; margin-top: 0.4rem; font-size: 0.8rem; opacity: 0.95;">💡 <b>Value Tip:</b> While Open Choice 3 is the cheapest overall, the <b>Open Access</b> plan is $${(oaCost - minCost).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} more per year but offers a <b>$0 Deductible</b> in-network. If you prefer fixed copays with no upfront deductible surprises, Open Access is an excellent alternative.</span>`;
+    }
+    
+    recText.innerHTML = recommendationHTML;
+  } else if (recBanner) {
+    recBanner.style.display = 'none';
+  }
+}
+
+function renderCostChart(activePlans, planCosts) {
+  const svg = document.getElementById('svg-cost-chart');
+  if (!svg) return;
+  svg.innerHTML = '';
+  
+  if (!activePlans || activePlans.length === 0) return;
+  
+  let maxCost = 0;
+  activePlans.forEach(p => {
+    const costs = planCosts[p];
+    if (costs.total > maxCost) maxCost = costs.total;
+  });
+  
+  if (maxCost === 0) maxCost = 5000;
+  const yCeiling = Math.ceil(maxCost / 1000) * 1000;
+  
+  const width = 600;
+  const height = 300;
+  const padLeft = 60;
+  const padRight = 20;
+  const padTop = 30;
+  const padBottom = 45;
+  const plotWidth = width - padLeft - padRight;
+  const plotHeight = height - padTop - padBottom;
+  
+  // Grid Lines
+  const gridLinesCount = 5;
+  for (let i = 0; i < gridLinesCount; i++) {
+    const yVal = (yCeiling / (gridLinesCount - 1)) * i;
+    const yPos = padTop + plotHeight - (yVal / yCeiling) * plotHeight;
+    
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', padLeft);
+    line.setAttribute('y1', yPos);
+    line.setAttribute('x2', width - padRight);
+    line.setAttribute('y2', yPos);
+    line.setAttribute('stroke', document.body.classList.contains('dark') ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.06)');
+    line.setAttribute('stroke-dasharray', '4,4');
+    svg.appendChild(line);
+    
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', padLeft - 8);
+    text.setAttribute('y', yPos + 4);
+    text.setAttribute('text-anchor', 'end');
+    text.setAttribute('fill', 'var(--text-muted)');
+    text.setAttribute('font-size', '10px');
+    text.setAttribute('font-weight', '600');
+    text.textContent = '$' + Math.round(yVal);
+    svg.appendChild(text);
+  }
+  
+  // Columns
+  const barWidth = 45;
+  const colWidth = plotWidth / activePlans.length;
+  
+  activePlans.forEach((p, idx) => {
+    const costs = planCosts[p];
+    const colX = padLeft + idx * colWidth + (colWidth - barWidth) / 2;
+    
+    const premiumHeight = (costs.fixed / yCeiling) * plotHeight;
+    const oopHeight = (costs.oop / yCeiling) * plotHeight;
+    
+    const premiumY = padTop + plotHeight - premiumHeight;
+    const oopY = premiumY - oopHeight;
+    
+    const barGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    barGroup.setAttribute('class', 'chart-bar-group');
+    
+    const bgBar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bgBar.setAttribute('x', colX);
+    bgBar.setAttribute('y', padTop);
+    bgBar.setAttribute('width', barWidth);
+    bgBar.setAttribute('height', plotHeight);
+    bgBar.setAttribute('class', 'chart-bar-bg');
+    bgBar.setAttribute('rx', '4');
+    barGroup.appendChild(bgBar);
+    
+    if (premiumHeight > 0) {
+      const premBar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      premBar.setAttribute('x', colX);
+      premBar.setAttribute('y', premiumY);
+      premBar.setAttribute('width', barWidth);
+      premBar.setAttribute('height', premiumHeight);
+      premBar.setAttribute('class', 'chart-bar-premium');
+      premBar.setAttribute('rx', oopHeight > 0 ? '0' : '4');
+      barGroup.appendChild(premBar);
+    }
+    
+    if (oopHeight > 0) {
+      const oopBar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      oopBar.setAttribute('x', colX);
+      oopBar.setAttribute('y', oopY);
+      oopBar.setAttribute('width', barWidth);
+      oopBar.setAttribute('height', oopHeight);
+      oopBar.setAttribute('class', 'chart-bar-oop');
+      oopBar.setAttribute('rx', '4');
+      barGroup.appendChild(oopBar);
+    }
+    
+    const xLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    xLabel.setAttribute('x', colX + barWidth / 2);
+    xLabel.setAttribute('y', padTop + plotHeight + 16);
+    xLabel.setAttribute('text-anchor', 'middle');
+    xLabel.setAttribute('fill', 'var(--text-primary)');
+    xLabel.setAttribute('font-size', '10px');
+    xLabel.setAttribute('font-weight', '700');
+    xLabel.textContent = PLAN_BENEFITS[p].name;
+    svg.appendChild(xLabel);
+    
+    const xSubLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    xSubLabel.setAttribute('x', colX + barWidth / 2);
+    xSubLabel.setAttribute('y', padTop + plotHeight + 28);
+    xSubLabel.setAttribute('text-anchor', 'middle');
+    xSubLabel.setAttribute('fill', 'var(--accent-teal)');
+    xSubLabel.setAttribute('font-size', '9.5px');
+    xSubLabel.setAttribute('font-weight', '700');
+    xSubLabel.textContent = '$' + costs.total.toLocaleString(undefined, {maximumFractionDigits: 0});
+    svg.appendChild(xSubLabel);
+    
+    // Tooltip Overlay inside SVG
+    const tooltipGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    tooltipGroup.setAttribute('opacity', '0');
+    tooltipGroup.setAttribute('class', 'chart-bar-tooltip');
+    tooltipGroup.style.pointerEvents = 'none';
+    
+    const ttWidth = 145;
+    const ttHeight = 65;
+    const ttX = Math.min(width - ttWidth - 5, Math.max(5, colX + barWidth/2 - ttWidth/2));
+    const ttY = Math.max(5, oopY - ttHeight - 8);
+    
+    const ttRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    ttRect.setAttribute('x', ttX);
+    ttRect.setAttribute('y', ttY);
+    ttRect.setAttribute('width', ttWidth);
+    ttRect.setAttribute('height', ttHeight);
+    ttRect.setAttribute('rx', '6');
+    ttRect.setAttribute('fill', document.body.classList.contains('dark') ? '#1e293b' : '#ffffff');
+    ttRect.setAttribute('stroke', 'var(--accent-blue)');
+    ttRect.setAttribute('stroke-width', '1.5');
+    tooltipGroup.appendChild(ttRect);
+    
+    const ttTitle = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    ttTitle.setAttribute('x', ttX + 8);
+    ttTitle.setAttribute('y', ttY + 16);
+    ttTitle.setAttribute('fill', 'var(--text-primary)');
+    ttTitle.setAttribute('font-size', '10px');
+    ttTitle.setAttribute('font-weight', '800');
+    ttTitle.textContent = PLAN_BENEFITS[p].name;
+    tooltipGroup.appendChild(ttTitle);
+    
+    const ttLine1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    ttLine1.setAttribute('x', ttX + 8);
+    ttLine1.setAttribute('y', ttY + 32);
+    ttLine1.setAttribute('fill', 'var(--text-secondary)');
+    ttLine1.setAttribute('font-size', '9px');
+    ttLine1.textContent = 'Fixed Costs: $' + costs.fixed.toFixed(0) + '/yr';
+    tooltipGroup.appendChild(ttLine1);
+    
+    const ttLine2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    ttLine2.setAttribute('x', ttX + 8);
+    ttLine2.setAttribute('y', ttY + 45);
+    ttLine2.setAttribute('fill', 'var(--text-secondary)');
+    ttLine2.setAttribute('font-size', '9px');
+    ttLine2.textContent = 'Simulated OOP: $' + costs.oop.toFixed(0) + '/yr';
+    tooltipGroup.appendChild(ttLine2);
+
+    const ttLine3 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    ttLine3.setAttribute('x', ttX + 8);
+    ttLine3.setAttribute('y', ttY + 58);
+    ttLine3.setAttribute('fill', 'var(--accent-teal)');
+    ttLine3.setAttribute('font-size', '10px');
+    ttLine3.setAttribute('font-weight', '700');
+    ttLine3.textContent = 'Total Cost: $' + costs.total.toFixed(0) + '/yr';
+    tooltipGroup.appendChild(ttLine3);
+    
+    barGroup.addEventListener('mouseenter', () => {
+      tooltipGroup.setAttribute('opacity', '1');
+    });
+    barGroup.addEventListener('mouseleave', () => {
+      tooltipGroup.setAttribute('opacity', '0');
+    });
+    
+    svg.appendChild(barGroup);
+    svg.appendChild(tooltipGroup);
+  });
+}
+
+function renderComparisonMatrix() {
+  const group = selectGroup.value;
+  const tier = selectTier.value;
+  const table = document.getElementById('compare-matrix-table');
+  if (!table) return;
+  
+  const plans = ['oa', 'oc1', 'oc2', 'oc3'];
+  const activePlans = plans.filter(p => {
+    const sharePct = sharePcts[group] ? sharePcts[group][p] : null;
+    return sharePct !== null;
+  });
+  
+  let html = `
+    <thead>
+      <tr>
+        <th style="text-align: left;">Plan Features & Rules</th>
+        ${activePlans.map(p => `<th>${PLAN_BENEFITS[p].name}</th>`).join('')}
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Bargaining Group Share</td>
+        ${activePlans.map(p => `<td>${sharePcts[group][p]}%</td>`).join('')}
+      </tr>
+      <tr>
+        <td>Guaranteed Paycheck Deduction</td>
+        ${activePlans.map(p => {
+          const baseRate = premiumRates[group][p] ? premiumRates[group][p][tier] : 0;
+          const share = sharePcts[group][p];
+          const annual = (baseRate * share / 100) * 12;
+          const paycheck = annual / PAY_PERIODS[group];
+          return `<td>$${paycheck.toFixed(2)} <span style="font-size: 0.725rem; color: var(--text-muted); display: block;">/ paycheck</span></td>`;
+        }).join('')}
+      </tr>
+      <tr>
+        <td>In-Network Deductible</td>
+        ${activePlans.map(p => `<td>${p === 'oc3' ? (tier === 'individual' ? '$1,100' : '$2,200') : '$0'}</td>`).join('')}
+      </tr>
+      <tr>
+        <td>In-Network Out-of-Pocket Max</td>
+        ${activePlans.map(p => `<td>${tier === 'individual' ? '$6,600' : '$13,200'}</td>`).join('')}
+      </tr>
+      <tr>
+        <td>Primary Care (PCP) Visit</td>
+        ${activePlans.map(p => `<td>$${PLAN_BENEFITS[p].in.pcp} Copay</td>`).join('')}
+      </tr>
+      <tr>
+        <td>Specialist Visit</td>
+        ${activePlans.map(p => `<td>$${PLAN_BENEFITS[p].in.specialist} Copay</td>`).join('')}
+      </tr>
+      <tr>
+        <td>Urgent Care Care</td>
+        ${activePlans.map(p => `<td>$${PLAN_BENEFITS[p].in.urgent} Copay</td>`).join('')}
+      </tr>
+      <tr>
+        <td>Emergency Room Visit</td>
+        ${activePlans.map(p => `<td>$${PLAN_BENEFITS[p].in.er} Copay</td>`).join('')}
+      </tr>
+      <tr>
+        <td>Inpatient Hospital Stay</td>
+        ${activePlans.map(p => {
+          const plan = PLAN_BENEFITS[p];
+          if (p === 'oc1') return `<td>$75 / day<br><span style="font-size: 0.7rem; color: var(--text-muted);">(max $375 per stay)</span></td>`;
+          return `<td>$${plan.in.inpatient} Copay</td>`;
+        }).join('')}
+      </tr>
+      <tr>
+        <td>Outpatient Surgery</td>
+        ${activePlans.map(p => `<td>$${PLAN_BENEFITS[p].in.outpatient} Copay</td>`).join('')}
+      </tr>
+      <tr>
+        <td>Routine X-Ray Services</td>
+        ${activePlans.map(p => {
+          if (p === 'oc3') return `<td>100% Covered<br><span style="font-size: 0.725rem; color: var(--text-muted);">(subject to deductible)</span></td>`;
+          if (PLAN_BENEFITS[p].in.xray === 0) return `<td class="comparison-check">✓ 100% Covered ($0)</td>`;
+          return `<td>$${PLAN_BENEFITS[p].in.xray} Copay</td>`;
+        }).join('')}
+      </tr>
+      <tr>
+        <td>Routine Lab Work</td>
+        ${activePlans.map(p => {
+          if (p === 'oc3') return `<td>100% Covered<br><span style="font-size: 0.725rem; color: var(--text-muted);">(subject to deductible)</span></td>`;
+          return `<td class="comparison-check">✓ 100% Covered ($0)</td>`;
+        }).join('')}
+      </tr>
+      <tr>
+        <td>Complex Imaging (MRI, CT, PET)</td>
+        ${activePlans.map(p => {
+          if (p === 'oc3') return `<td>100% Covered<br><span style="font-size: 0.725rem; color: var(--text-muted);">(subject to deductible)</span></td>`;
+          if (PLAN_BENEFITS[p].in.imaging === 0) return `<td class="comparison-check">✓ 100% Covered ($0)</td>`;
+          return `<td>$${PLAN_BENEFITS[p].in.imaging} Copay</td>`;
+        }).join('')}
+      </tr>
+      <tr>
+        <td>Out-of-Network Coinsurance</td>
+        ${activePlans.map(p => `<td>${(1 - PLAN_BENEFITS[p].out.coinsurance) * 100}% Coinsurance</td>`).join('')}
+      </tr>
+    </tbody>
+  `;
+  table.innerHTML = html;
+}
+
+function initDarkMode() {
+  const isDark = localStorage.getItem('cbsd_dark_mode') === 'true' || 
+                 (!('cbsd_dark_mode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if (isDark) {
+    document.body.classList.add('dark');
+    const sunIcon = document.querySelector('.sun-icon');
+    const moonIcon = document.querySelector('.moon-icon');
+    if (sunIcon) sunIcon.style.display = 'none';
+    if (moonIcon) moonIcon.style.display = 'block';
+  } else {
+    document.body.classList.remove('dark');
+    const sunIcon = document.querySelector('.sun-icon');
+    const moonIcon = document.querySelector('.moon-icon');
+    if (sunIcon) sunIcon.style.display = 'block';
+    if (moonIcon) moonIcon.style.display = 'none';
+  }
+}
+
+function setupSimulatorListeners() {
+  const slidersList = [
+    'pcp', 'specialist', 'urgent', 'er', 'inpatient', 'inpatient-days',
+    'outpatient', 'therapy', 'chiro', 'xray', 'lab', 'imaging', 'rx-generic', 'rx-brand'
+  ];
+  
+  slidersList.forEach(sId => {
+    const slider = document.getElementById('slide-' + sId);
+    const bubble = document.getElementById('val-' + sId);
+    if (slider) {
+      slider.addEventListener('input', () => {
+        if (bubble) bubble.textContent = slider.value;
+        
+        // Deactivate presets since custom slider change happened
+        document.querySelectorAll('.presets-grid .btn-preset').forEach(b => b.classList.remove('active'));
+        calculateSimulator();
+      });
+    }
+  });
+  
+  // Presets
+  const pLow = document.getElementById('preset-low');
+  const pMod = document.getElementById('preset-mod');
+  const pHigh = document.getElementById('preset-high');
+  
+  const handlePresetClick = (presetKey, clickedBtn) => {
+    document.querySelectorAll('.presets-grid .btn-preset').forEach(b => b.classList.remove('active'));
+    clickedBtn.classList.add('active');
+    
+    const vals = presets[presetKey];
+    Object.keys(vals).forEach(k => {
+      const inputId = k.replace('_', '-');
+      const slider = document.getElementById('slide-' + inputId);
+      const bubble = document.getElementById('val-' + inputId);
+      if (slider) {
+        slider.value = vals[k];
+        if (bubble) bubble.textContent = vals[k];
+      }
+    });
+    calculateSimulator();
+  };
+  
+  if (pLow) pLow.addEventListener('click', () => handlePresetClick('low', pLow));
+  if (pMod) pMod.addEventListener('click', () => handlePresetClick('mod', pMod));
+  if (pHigh) pHigh.addEventListener('click', () => handlePresetClick('high', pHigh));
+  
+  if (toggleDental) {
+    toggleDental.addEventListener('change', () => {
+      calculateSimulator();
+      updatePremiumDisplay();
+    });
+  }
+  
+  // Theme Switcher
+  if (darkModeToggle) {
+    darkModeToggle.addEventListener('click', () => {
+      const isDark = document.body.classList.toggle('dark');
+      localStorage.setItem('cbsd_dark_mode', isDark);
+      
+      const sunIcon = document.querySelector('.sun-icon');
+      const moonIcon = document.querySelector('.moon-icon');
+      if (isDark) {
+        if (sunIcon) sunIcon.style.display = 'none';
+        if (moonIcon) moonIcon.style.display = 'block';
+      } else {
+        if (sunIcon) sunIcon.style.display = 'block';
+        if (moonIcon) moonIcon.style.display = 'none';
+      }
+      // Re-render chart to pick up theme changes
+      renderCostChart(['oa', 'oc1', 'oc2', 'oc3'].filter(p => sharePcts[selectGroup.value][p] !== null), {});
+      calculateSimulator();
+    });
+  }
+  
+  // Comparison Modal
+  if (btnOpenCompare && compareModal) {
+    btnOpenCompare.addEventListener('click', () => {
+      renderComparisonMatrix();
+      compareModal.classList.add('active');
+    });
+  }
+  
+  if (btnCloseCompare && compareModal) {
+    btnCloseCompare.addEventListener('click', () => {
+      compareModal.classList.remove('active');
+    });
+  }
+  
+  window.addEventListener('click', (e) => {
+    if (e.target === compareModal) {
+      compareModal.classList.remove('active');
+    }
+  });
+}
+
 // 11. Page Event Listeners
 selectGroup.addEventListener('change', () => {
   // Update Open Choice 1 visibility based on selection
@@ -1279,8 +1983,16 @@ explorerButtons.forEach(btn => {
 
 // 12. Run on Startup
 initRates();
+initDarkMode();
+setupSimulatorListeners();
 updatePremiumDisplay();
 renderExplorer();
+
+// Initialize simulator to default low preset on start
+const presetLowBtn = document.getElementById('preset-low');
+if (presetLowBtn) {
+  presetLowBtn.click();
+}
 
 // Trigger a selectGroup change on start to hide OC1 by default for CBEA
 selectGroup.dispatchEvent(new Event('change'));
@@ -1289,213 +2001,386 @@ selectGroup.dispatchEvent(new Event('change'));
 // 13. Floating Benefits AI Assistant Logic
 // ==========================================
 
+const BOT_INTENTS = [
+  {
+    id: 'cheapest',
+    keywords: ['cheap', 'cheapest', 'lowest premium', 'save money', 'save on premium', 'least expensive', 'low cost', 'cost-effective', 'save premium'],
+    title: '💰 Lowest Premium',
+    followups: ['deductibles', 'choice3'],
+    getResponse: (group, tier) => {
+      return `💰 <b>Lowest Premium Option: Open Choice 3</b><br>
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li><b>Premium Cost:</b> Open Choice 3 has the lowest monthly employee premiums (often $0 depending on your bargaining group).</li>
+        <li><b>The Catch:</b> It has an in-network deductible of <b>$1,100 (Individual) / $2,200 (Family)</b>. You must pay 100% of diagnostic costs (like standard X-Rays, Lab work, and MRIs/CT scans) out-of-pocket until you meet this deductible.</li>
+        <li><b>Gist:</b> Excellent if you are healthy and want to save on monthly deductions, but carries upfront out-of-pocket risk for medical tests.</li>
+      </ul>`;
+    }
+  },
+  {
+    id: 'open_access',
+    keywords: ['open access', ' oa', 'oa ', 'best bang', 'no deductible plan'],
+    title: '🚀 Open Access',
+    followups: ['cheapest', 'deductibles'],
+    getResponse: (group, tier) => {
+      return `🚀 <b>Open Access Plan ("Best Bang for Your Buck")</b><br>
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li><b>Premium Cost:</b> Higher monthly premium deductions than Choice 3.</li>
+        <li><b>Benefit:</b> <b>$0 Deductible</b> in-network. You only pay flat copays for visits ($15 PCP, $25 specialist) and diagnostics are 100% covered immediately ($0).</li>
+        <li><b>Gist:</b> Best predictability. If you go to the doctor often or want zero financial surprise at the clinic, this plan offers the greatest value.</li>
+      </ul>`;
+    }
+  },
+  {
+    id: 'choice2',
+    keywords: ['choice 2', 'oc2', 'mercedes'],
+    title: '🚗 Open Choice 2',
+    followups: ['open_access', 'choice1'],
+    getResponse: (group, tier) => {
+      return `🚗 <b>Open Choice 2 ("The Mercedes Plan")</b><br>
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li><b>Premium Cost:</b> Moderate monthly premiums.</li>
+        <li><b>Benefit:</b> Extremely comprehensive coverage with highest monthly premium. You go girl!</li>
+      </ul>`;
+    }
+  },
+  {
+    id: 'choice1',
+    keywords: ['choice 1', 'oc1', 'premium classic'],
+    title: '✨ Open Choice 1',
+    followups: ['choice2', 'open_access'],
+    getResponse: (group, tier) => {
+      const isEliminated = group === 'cbea' || group.startsWith('transportation');
+      return `✨ <b>Open Choice 1 ("The Premium Classic")</b><br>
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li><b>Availability:</b> ${isEliminated ? '❌ <b style="color: #ef4444;">Eliminated</b> for Teachers (CBEA) and Transportation, but still available for Act 93, Confidentials, and Support Staff.' : '✅ Available for your active group.'}</li>
+        <li><b>Benefit:</b> $0 in-network deductible, $10 PCP, $20 Specialist, and unique $75/day daily hospital copays (max $375).</li>
+      </ul>`;
+    }
+  },
+  {
+    id: 'deductibles',
+    keywords: ['deductible', 'deductibles', 'deduct', 'deductable'],
+    title: '🛡️ Deductibles',
+    followups: ['oop_max', 'cheapest'],
+    getResponse: (group, tier) => {
+      const ded3 = tier === 'family' ? '$2,200 (Family)' : '$1,100 (Individual)';
+      return `🛡️ <b>In-Network Deductible Comparison (${tier === 'family' ? 'Family Tier' : 'Individual Tier'}):</b><br>
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li><b>Open Access:</b> $0 Deductible</li>
+        <li><b>Open Choice 1:</b> $0 Deductible</li>
+        <li><b>Open Choice 2:</b> $0 Deductible</li>
+        <li><b>Open Choice 3:</b> <b>${ded3}</b></li>
+      </ul>
+      <p style="margin-top: 0.35rem; font-size: 0.75rem; font-style: italic;">Note: For Open Choice 3, you pay 100% of diagnostic services (X-rays, labs, imaging, etc.) out-of-pocket until the deductible is met. All other plans cover diagnostics immediately with no deductible.</p>`;
+    }
+  },
+  {
+    id: 'diagnostics',
+    keywords: ['x-ray', 'xray', 'scan', 'mri', 'imaging', 'lab', 'laboratory', 'diagnostic', 'ct scan', 'blood work', 'ultrasound'],
+    title: '🩻 X-Rays & Lab',
+    followups: ['deductibles', 'choice3'],
+    getResponse: (group, tier) => {
+      const dedVal = tier === 'family' ? '$2,200 family deductible' : '$1,100 individual deductible';
+      return `🩻 <b>Diagnostic & Imaging Coverage:</b><br>
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li><b>Open Access:</b> 100% Covered ($0 cost) immediately.</li>
+        <li><b>Open Choice 1:</b> $20 Copay (Labs 100% covered).</li>
+        <li><b>Open Choice 2:</b> $40 Copay for X-Rays, $20 Copay for Complex Imaging/MRIs (Labs 100% covered).</li>
+        <li><b>Open Choice 3:</b> <b>100% Covered ONLY after meeting the deductible</b> (${dedVal}). You pay full allowed cost until then.</li>
+      </ul>`;
+    }
+  },
+  {
+    id: 'dental',
+    keywords: ['dental', 'teeth', 'tooth', 'dentist', 'braces', 'ortho', 'orthodontia', 'gum'],
+    title: '🦷 Dental Benefits',
+    followups: ['vision', 'network'],
+    getResponse: (group, tier) => {
+      const isSupport = group === 'support_12' || group === 'support_10';
+      const isCbea = group === 'cbea';
+      if (isSupport) {
+        return `🦷 <b>Dental Eligibility for Support Staff:</b><br>
+        <span style="color: #ef4444; font-weight: 600;">Dental is NOT offered</span> to Support Staff (10 or 12 month) under the active school district contract.<br>
+        <p style="margin-top: 0.35rem; font-size: 0.75rem;">Support staff are ineligible for the voluntary dental premium plan.</p>`;
+      }
+      const ratesStr = isCbea ? `Your voluntary rates are: Single: $8.00/mo, 2-Party: $16.00/mo, Family: $24.00/mo.` : `Check the simulator for active rates.`;
+      return `🦷 <b>Voluntary Dental Plan Rules & Summaries:</b><br>
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li><b>Active Group Rate:</b> ${ratesStr}</li>
+        <li><b>Plan Summaries:</b> 
+          <ul>
+            <li><a href="docs/guardian-dental-teachers.pdf" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">Guardian Dental Kit 1 (Teachers/Admin)</a></li>
+            <li><a href="docs/guardian-dental-support.pdf" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">Guardian Dental Kit 2 (Support Staff)</a></li>
+          </ul>
+        </li>
+        <li><b>General Rule:</b> Offered to Teachers (CBEA), Act 93, Confidentials, and Transportation as a voluntary add-on.</li>
+      </ul>`;
+    }
+  },
+  {
+    id: 'vision',
+    keywords: ['vision', 'eye', 'glasses', 'eyemed', 'contacts', 'optometrist', 'ophthalmologist', 'lens'],
+    title: '👁️ Vision Benefits',
+    followups: ['dental', 'network'],
+    getResponse: (group, tier) => {
+      return `👁️ <b>Voluntary Vision (Eye Med) Rates & Benefits:</b><br>
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li><b>EyeMed Summary:</b> Check the detailed <a href="docs/eyemed-benefits.pdf" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">EyeMed Vision Benefits PDF</a> for copays on exams, lenses, and frames.</li>
+        <li><b>Monthly Rates (offered to all groups):</b>
+          <ul>
+            <li><b>Single:</b> $5.62</li>
+            <li><b>2-Party:</b> $10.68</li>
+            <li><b>Family:</b> $15.69</li>
+          </ul>
+        </li>
+      </ul>`;
+    }
+  },
+  {
+    id: 'hours_rule',
+    keywords: ['1080', 'hours', 'transportation rule', 'under 1080', 'part time transportation', 'part-time bus'],
+    title: '🚌 1080 Hours Rule',
+    followups: ['cheapest', 'open_access'],
+    getResponse: (group, tier) => {
+      return `🚌 <b>Transportation (10-Month) under 1080 Hours Rule:</b><br>
+      If you are a 10-Month Transportation employee working under 1080 hours per year:
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li>You are <b>not eligible</b> for the Open Access plan.</li>
+        <li>Your Open Choice 3 rates automatically scale to higher employee-share premium rates.</li>
+      </ul>`;
+    }
+  },
+  {
+    id: 'network',
+    keywords: ['network', 'out-of-network', 'oon', 'in-network', 'doctor', 'physician', 'find a', 'provider', 'directory', 'specialist visit', 'pcp visit', 'copay', 'office visit', 'co-pay', 'visit cost', 'pcp', 'specialist'],
+    title: '🏥 Copays & Doctor Finder',
+    followups: ['deductibles', 'oop_max'],
+    getResponse: (group, tier) => {
+      return `🏥 <b>Copays & Provider Networks:</b><br>
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li><b>PCP Office Visit Copays:</b>
+          <ul>
+            <li>Open Access: $15</li>
+            <li>Choice 1: $10</li>
+            <li>Choice 2: $20</li>
+            <li>Choice 3: $25 (covered immediately, before deductible)</li>
+          </ul>
+        </li>
+        <li><b>Specialist Visit Copays:</b>
+          <ul>
+            <li>Open Access: $25</li>
+            <li>Choice 1: $20</li>
+            <li>Choice 2: $40</li>
+            <li>Choice 3: $50 (covered immediately, before deductible)</li>
+          </ul>
+        </li>
+        <li><b>Find a Doctor:</b> Verify network status via the <a href="https://www.aetna.com/dsepublic/#/contentPage?page=providerSearchLanding&site_id=asa&language=en" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">Aetna Provider Finder</a>.</li>
+        <li><b>Out-of-Network Coinsurance:</b> Open Access & Choice 3: 50% member coinsurance. Choice 1 & Choice 2: 70% member coinsurance.</li>
+      </ul>`;
+    }
+  },
+  {
+    id: 'maternity',
+    keywords: ['baby', 'maternity', 'pregnant', 'childbirth', 'delivery', 'prenatal', 'pregnancy', 'having a baby', 'newborn', 'obstetrician', 'obgyn'],
+    title: '👶 Maternity',
+    followups: ['oop_max', 'network'],
+    getResponse: (group, tier) => {
+      const isFamily = tier === 'family';
+      const maxExposure = isFamily ? '$13,200' : '$6,600';
+      return `👶 <b>Maternity & Newborn Coverage (${isFamily ? 'Family Tier' : 'Individual Tier'}):</b><br>
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li><b>Prenatal & Postnatal Visits:</b> 100% covered in-network ($0 cost) across all plans.</li>
+        <li><b>Delivery & Hospital Stay:</b> Covered under Inpatient Admission:
+          <ul>
+            <li><b>Open Access:</b> $250 Copay per admission.</li>
+            <li><b>Open Choice 2:</b> $350 Copay per admission.</li>
+            <li><b>Open Choice 3:</b> $300 Copay per admission (deductible does not apply).</li>
+            <li><b>Open Choice 1:</b> $75 per day (max $375 per admission).</li>
+          </ul>
+        </li>
+        <li><b>Maximum Exposure:</b> Your in-network out-of-pocket maximum is <b>${maxExposure}</b>.</li>
+      </ul>`;
+    }
+  },
+  {
+    id: 'surgery',
+    keywords: ['surgery', 'operation', 'outpatient', 'procedure', 'hospitalization', 'admitted', 'inpatient stay'],
+    title: '🔪 Surgery',
+    followups: ['maternity', 'network'],
+    getResponse: (group, tier) => {
+      return `🔪 <b>Surgery & Outpatient Care Coverage:</b><br>
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li><b>Open Access:</b> $100 outpatient copay / $250 inpatient copay.</li>
+        <li><b>Open Choice 1:</b> $75 outpatient copay / $75 daily inpatient (max $375).</li>
+        <li><b>Open Choice 2:</b> $200 outpatient copay / $350 inpatient copay.</li>
+        <li><b>Open Choice 3:</b> $200 outpatient copay / $300 inpatient copay (deductible does not apply to outpatient surgery or inpatient admission).</li>
+      </ul>`;
+    }
+  },
+  {
+    id: 'rx',
+    keywords: ['prescription', 'meds', 'drugs', 'pharmacy', 'rx', 'pills', 'medication', 'capital rx'],
+    title: '💊 Prescriptions',
+    followups: ['network', 'cheapest'],
+    getResponse: (group, tier) => {
+      const isTrans = group.startsWith('transportation');
+      const noteStr = isTrans ? `<b>Note:</b> Under your Transportation contract, retail Tier 2/3/4 copays are slightly lower ($20/$35/$35) and mail-order Tier 2 is $40.` : `Prescription benefits are identical for Teachers, Act 93, Confidentials, and Support Staff.`;
+      return `💊 <b>Prescription Drug Coverage (Capital Rx):</b><br>
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li><b>30-Day Retail:</b> Generic ($10), Preferred Brand ($25), Non-Preferred ($40), Specialty ($100).</li>
+        <li><b>90-Day Mail Order:</b> Generic ($20), Preferred Brand ($50), Non-Preferred ($80).</li>
+        <li>${noteStr}</li>
+        <li><b>Portal:</b> Log in to <a href="https://app.cap-rx.com/login" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">Capital Rx Portal</a> to manage prescriptions.</li>
+      </ul>`;
+    }
+  },
+  {
+    id: 'er',
+    keywords: ['er ', 'emergency', 'accident', 'ambulance', 'urgent care', 'er copay'],
+    title: '🚨 Emergency Care',
+    followups: ['surgery', 'network'],
+    getResponse: (group, tier) => {
+      const dedMsg = tier === 'family' ? 'family deductible ($2,200)' : 'individual deductible ($1,100)';
+      return `🚨 <b>Emergency Room, Ambulance & Urgent Care:</b><br>
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li><b>Emergency Room Visit:</b> <b>$100 Copay</b> across all four plans (waived immediately if admitted).</li>
+        <li><b>Urgent Care Visit:</b> Open Access ($24), Choice 1 ($28), Choice 2 ($28), Choice 3 ($50).</li>
+        <li><b>Ambulance Services:</b>
+          <ul>
+            <li>Open Access, Choice 1, Choice 2: 100% Covered ($0 cost).</li>
+            <li>Open Choice 3: 100% Covered <i>after meeting the deductible</i> (${dedMsg}).</li>
+          </ul>
+        </li>
+      </ul>`;
+    }
+  },
+  {
+    id: 'choice3',
+    keywords: ['choice 3', 'oc3', 'thrift', 'saver', 'high deductible', 'hdhp'],
+    title: '🛡️ Open Choice 3',
+    followups: ['cheapest', 'deductibles'],
+    getResponse: (group, tier) => {
+      const dedStr = tier === 'family' ? '$2,200 (Family)' : '$1,100 (Individual)';
+      return `🛡️ <b>Open Choice 3 ("The Thrift Option")</b><br>
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li><b>Premium Cost:</b> Lowest monthly premium of any plan.</li>
+        <li><b>In-Network Deductible:</b> <b>${dedStr}</b>. You pay 100% of diagnostic costs out-of-pocket until met.</li>
+        <li><b>Gist:</b> High deductible risk, but compensated by very low (or $0) paycheck deductions.</li>
+      </ul>`;
+    }
+  },
+  {
+    id: 'covered_services',
+    keywords: ['acupuncture', 'bariatric', 'infertility', 'private duty', 'nursing', 'chiropractic', 'chiro', 'covered services', 'pt', 'physical therapy', 'occupational therapy', 'speech therapy', 'therapy limit', 'manipulation'],
+    title: '⚕️ Covered Services & PT',
+    followups: ['network', 'choice2'],
+    getResponse: (group, tier) => {
+      return `⚕️ <b>Covered Therapies & Special Services:</b><br>
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li><b>Chiropractic Care:</b> Covered in-network (100 visits/yr for Open Access; 30 visits/yr for Choice 1, 2, & 3).</li>
+        <li><b>Physical / Speech / Occupational Therapy:</b>
+          <ul>
+            <li>Open Access: 100% covered ($0). Limit 240 visits.</li>
+            <li>Choice 1: $15 copay (visits 1-30) / $25 copay (visits 31-60). Limit 60 visits.</li>
+            <li>Choice 2: $20 copay (visits 1-30) / $40 copay (visits 31-60). Limit 60 visits.</li>
+            <li>Choice 3: $25 copay (visits 1-30) / $50 copay (visits 31-60). Limit 60 visits.</li>
+          </ul>
+        </li>
+        <li><b>Acupuncture:</b> Covered in-network across all plans (limitations/preauthorization may apply).</li>
+        <li><b>Bariatric Surgery:</b> Covered in-network (limit 1 procedure per lifetime).</li>
+        <li><b>Private-Duty Nursing:</b> Covered in-network (limit 45 shifts of 8 hours per plan year).</li>
+      </ul>`;
+    }
+  },
+  {
+    id: 'oop_max',
+    keywords: ['out of pocket max', 'oop max', 'out-of-pocket maximum', 'exposure', 'ceiling', 'cap', 'limit', 'worst case', 'catastrophic'],
+    title: '🛡️ OOP Max',
+    followups: ['deductibles', 'cheapest'],
+    getResponse: (group, tier) => {
+      const maxVal = tier === 'family' ? '$13,200' : '$6,600';
+      return `🛡️ <b>In-Network Out-of-Pocket Maximum (${tier === 'family' ? 'Family Tier' : 'Individual Tier'}):</b><br>
+      <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
+        <li><b>Standard Limit:</b> The maximum out-of-pocket exposure is <b>${maxVal}</b> in-network. This applies to Open Access, Open Choice 2, and Open Choice 3.</li>
+        <li><b>Open Choice 1:</b> The in-network OOP Max is slightly lower or different; please refer to the SBC documentation for specific group caps.</li>
+        <li><b>Worst-Case Scenario:</b> Once you hit this ceiling, the plan pays 100% of all covered in-network medical and prescription expenses for the rest of the plan year.</li>
+      </ul>`;
+    }
+  }
+];
+
 function generateBotResponse(userInput) {
-  const query = userInput.toLowerCase().trim();
+  const query = userInput.toLowerCase().trim()
+    .replace(/[?.,!/\\()&]/g, ' ')
+    .replace(/\s+/g, ' ');
+
+  const activeGroup = typeof selectGroup !== 'undefined' && selectGroup ? selectGroup.value : 'cbea';
+  const activeTier = typeof selectTier !== 'undefined' && selectTier ? selectTier.value : 'family';
   
-  // 1. Cheapest / Lowest Premium
-  if (query.includes('cheap') || query.includes('lowest premium') || query.includes('save money') || query.includes('cheapest') || query.includes('save on premium')) {
-    return `💰 <b>Lowest Premium Option: Open Choice 3</b><br>
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li><b>Premium Cost:</b> Open Choice 3 has the lowest monthly employee premiums (often $0 depending on your bargaining group).</li>
-      <li><b>The Catch:</b> It has an in-network deductible of <b>$1,100 (Individual) / $2,200 (Family)</b>. You must pay 100% of diagnostic costs (like standard X-Rays, Lab work, and MRIs/CT scans) out-of-pocket until you meet this deductible.</li>
-      <li><b>Gist:</b> Excellent if you are healthy and want to save on monthly deductions, but carries upfront out-of-pocket risk for medical tests.</li>
-    </ul>`;
+  // Scoring algorithm
+  let bestIntent = null;
+  const scoredIntents = [];
+
+  for (const intent of BOT_INTENTS) {
+    let score = 0;
+    
+    // Check keyword matching
+    for (const keyword of intent.keywords) {
+      if (query.includes(keyword)) {
+        // Calculate matches
+        // Phrase length multiplier
+        const wordCount = keyword.split(' ').length;
+        score += wordCount * 5;
+        
+        // Exact word boundary matching checks
+        const regex = new RegExp('\\b' + keyword.trim() + '\\b', 'i');
+        if (regex.test(query)) {
+          score += 5;
+        }
+      }
+    }
+    
+    if (score > 0) {
+      scoredIntents.push({ intent, score });
+    }
   }
   
-  // 2. Open Access
-  if (query.includes('open access') || query.includes(' oa ') || query === 'oa') {
-    return `🚀 <b>Open Access Plan ("Best Bang for Your Buck")</b><br>
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li><b>Premium Cost:</b> Higher monthly premium deductions than Choice 3.</li>
-      <li><b>Benefit:</b> <b>$0 Deductible</b> in-network. You only pay flat copays for visits ($15 PCP, $25 specialist) and diagnostics are 100% covered immediately ($0).</li>
-      <li><b>Gist:</b> Best predictability. If you go to the doctor often or want zero financial surprise at the clinic, this plan offers the greatest value.</li>
-    </ul>`;
+  // Sort by score descending
+  scoredIntents.sort((a, b) => b.score - a.score);
+  
+  if (scoredIntents.length > 0 && scoredIntents[0].score >= 5) {
+    const selected = scoredIntents[0].intent;
+    let reply = selected.getResponse(activeGroup, activeTier);
+    
+    // Append dynamic follow-up chips if they exist
+    if (selected.followups && selected.followups.length > 0) {
+      reply += `<div class="chat-followups">`;
+      for (const fId of selected.followups) {
+        const found = BOT_INTENTS.find(i => i.id === fId);
+        if (found) {
+          reply += `<button class="chat-followup-btn" data-q="${found.keywords[0]}">${found.title}</button>`;
+        }
+      }
+      reply += `</div>`;
+    }
+    return reply;
   }
-
-  // 3. Open Choice 2
-  if (query.includes('choice 2') || query.includes('oc2') || query.includes('mercedes')) {
-    return `🚗 <b>Open Choice 2 ("The Mercedes Plan")</b><br>
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li><b>Premium Cost:</b> Moderate monthly premiums.</li>
-      <li><b>Benefit:</b> Extremely comprehensive coverage with highest monthly premium. You go girl!</li>
-    </ul>`;
+  
+  // Fallback did-you-mean suggestion engine
+  let fallbackReply = `❓ <b>I'm not quite sure about that question.</b><br>
+  I can help answer questions or compare scenarios for the 2026-27 healthcare plans.<br>
+  Here are some topics you can ask me about:<br>
+  <div class="chat-followups" style="margin-top: 0.5rem; border-top: none;">`;
+  
+  const popular = ['cheapest', 'deductibles', 'dental', 'network', 'rx', 'maternity'];
+  for (const fId of popular) {
+    const found = BOT_INTENTS.find(i => i.id === fId);
+    if (found) {
+      fallbackReply += `<button class="chat-followup-btn" data-q="${found.keywords[0]}">${found.title}</button>`;
+    }
   }
-
-  // 4. Open Choice 1
-  if (query.includes('choice 1') || query.includes('oc1')) {
-    return `✨ <b>Open Choice 1 ("The Premium Classic")</b><br>
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li><b>Availability:</b> Eliminated for Teachers (CBEA) and Transportation, but available for Act 93, Confidentials, and Support Staff.</li>
-      <li><b>Benefit:</b> $0 in-network deductible, $10 PCP, $20 Specialist, and unique $75/day daily hospital copays (max $375).</li>
-    </ul>`;
-  }
-
-  // 5. Deductible Comparison
-  if (query.includes('deductible') || query.includes('deductibles')) {
-    return `🛡️ <b>In-Network Deductible Comparison:</b><br>
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li><b>Open Access:</b> $0 Deductible</li>
-      <li><b>Open Choice 1:</b> $0 Deductible</li>
-      <li><b>Open Choice 2:</b> $0 Deductible</li>
-      <li><b>Open Choice 3:</b> $1,100 (Individual) / $2,200 (Family)</li>
-    </ul>
-    <p style="margin-top: 0.35rem; font-size: 0.75rem; font-style: italic;">Note: For Open Choice 3, you pay 100% of diagnostic services (X-rays, labs, imaging, etc.) out-of-pocket until the deductible is met. All other plans cover diagnostics immediately with no deductible.</p>`;
-  }
-
-  // 6. X-Rays / Imaging / Diagnostics
-  if (query.includes('x-ray') || query.includes('xray') || query.includes('scan') || query.includes('mri') || query.includes('imaging') || query.includes('lab') || query.includes('laboratory') || query.includes('diagnostic')) {
-    return `🩻 <b>Diagnostic & Imaging Coverage:</b><br>
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li><b>Open Access:</b> 100% Covered ($0 cost) immediately.</li>
-      <li><b>Open Choice 1:</b> $20 Copay (Labs 100% covered).</li>
-      <li><b>Open Choice 2:</b> $40 Copay for X-Rays, $20 Copay for Complex Imaging/MRIs (Labs 100% covered).</li>
-      <li><b>Open Choice 3:</b> <b>100% Covered ONLY after meeting the deductible</b> ($1,100 Ind / $2,200 Fam). You pay full allowed cost until then.</li>
-    </ul>`;
-  }
-
-  // 7. Dental Availability
-  if (query.includes('dental') || query.includes('teeth')) {
-    return `🦷 <b>Voluntary Dental Plan Rules & Summaries:</b><br>
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li><b>Plan Summaries:</b> 
-        <ul>
-          <li><a href="docs/guardian-dental-teachers.pdf" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">Guardian Dental Kit 1 (Teachers/Admin)</a></li>
-          <li><a href="docs/guardian-dental-support.pdf" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">Guardian Dental Kit 2 (Support Staff)</a></li>
-        </ul>
-      </li>
-      <li><b>Support Staff:</b> Dental is <b>not offered</b> to Support Staff (10 or 12 month) under the district contract.</li>
-      <li><b>Teachers (CBEA):</b> Available voluntary dental rate is $8.00 (Single), $16.00 (2-Party), or $24.00 (Family).</li>
-      <li><b>Others:</b> Available for Act 93, Confidentials, and Transportation as a voluntary monthly add-on.</li>
-    </ul>`;
-  }
-
-  // 8. Vision / Eye Med
-  if (query.includes('vision') || query.includes('eye') || query.includes('glasses') || query.includes('eyemed')) {
-    return `👁️ <b>Voluntary Vision (Eye Med) Rates & Benefits:</b><br>
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li><b>EyeMed Summary:</b> Check the detailed <a href="docs/eyemed-benefits.pdf" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">EyeMed Vision Benefits PDF</a> for copays on exams, lenses, and frames.</li>
-      <li><b>Rates (offered to all groups):</b>
-        <ul>
-          <li><b>Single:</b> $5.62 / month</li>
-          <li><b>2-Party:</b> $10.68 / month</li>
-          <li><b>Family:</b> $15.69 / month</li>
-        </ul>
-      </li>
-    </ul>`;
-  }
-
-  // 9. Transportation Hours Rule
-  if (query.includes('1080') || query.includes('hours') || query.includes('transportation rule') || query.includes('under 1080')) {
-    return `🚌 <b>Transportation (10-Month) under 1080 Hours Rule:</b><br>
-    If you are a 10-Month Transportation employee working under 1080 hours per year:
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li>You are <b>not eligible</b> for the Open Access plan.</li>
-      <li>Your Open Choice 3 rates automatically scale to higher employee-share premium rates.</li>
-    </ul>`;
-  }
-
-  // 10. Out of Network
-  if (query.includes('network') || query.includes('out-of-network') || query.includes('oon') || query.includes('in-network') || query.includes('doctor') || query.includes('physician') || query.includes('find a')) {
-    return `🏥 <b>In-Network vs. Out-of-Network & Doctor Directory:</b><br>
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li><b>Find a Doctor:</b> Verify if your doctor is in-network using the official <a href="https://www.aetna.com/dsepublic/#/contentPage?page=providerSearchLanding&site_id=asa&language=en" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">Aetna Provider Finder</a>.</li>
-      <li><b>In-Network:</b> Standard copays and 100% covered preventative care.</li>
-      <li><b>Out-of-Network:</b> Subject to deductibles first, then coinsurance splits:
-        <ul>
-          <li>Open Access & Choice 3: 50% member coinsurance.</li>
-          <li>Choice 1 & Choice 2: 70% member coinsurance.</li>
-        </ul>
-      </li>
-      <li><b>Warning:</b> Out-of-network providers may balance-bill you for costs exceeding the allowed amount.</li>
-    </ul>`;
-  }
-
-  // 11. Maternity / Having a Baby
-  if (query.includes('baby') || query.includes('maternity') || query.includes('pregnant') || query.includes('childbirth') || query.includes('delivery') || query.includes('prenatal') || query.includes('pregnancy')) {
-    return `👶 <b>Having a Baby / Maternity Coverage:</b><br>
-    If you are welcoming a new baby under the family plan:
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li><b>Prenatal & Postnatal Care:</b> 100% covered in-network ($0 cost) across all plans (considered preventive care under the ACA).</li>
-      <li><b>Delivery & Hospital Stay:</b> Covered under Inpatient Hospitalization:
-        <ul>
-          <li><b>Open Access:</b> $250 Copay per admission.</li>
-          <li><b>Open Choice 2:</b> $350 Copay per admission.</li>
-          <li><b>Open Choice 3:</b> $300 Copay per admission (the in-net deductible does not apply to this copay).</li>
-          <li><b>Open Choice 1:</b> $75 per day (max $375 per admission).</li>
-        </ul>
-      </li>
-      <li><b>Pediatric Visits (Well-Baby Checks):</b> Preventive wellness checkups are 100% covered ($0). Sick visits go under PCP copays ($15 OA, $20 Choice 2, $25 Choice 3, $10 Choice 1).</li>
-      <li><b>Max Exposure:</b> The family out-of-pocket maximum limit is <b>$13,200</b> for all plans in-network.</li>
-    </ul>`;
-  }
-
-  // 12. Surgeries / Outpatient Care
-  if (query.includes('surgery') || query.includes('operation') || query.includes('outpatient') || query.includes('procedure')) {
-    return `🔪 <b>Outpatient Surgery Coverage:</b><br>
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li><b>Open Access:</b> $100 Copay in-network (deductible: $0).</li>
-      <li><b>Open Choice 1:</b> $75 Copay in-network (deductible: $0).</li>
-      <li><b>Open Choice 2:</b> $200 Copay in-network (deductible: $0).</li>
-      <li><b>Open Choice 3:</b> $200 Copay in-network (deductible does not apply to outpatient surgery in-network).</li>
-    </ul>`;
-  }
-
-  // 13. Prescriptions / Pharmacy
-  if (query.includes('prescription') || query.includes('meds') || query.includes('drugs') || query.includes('pharmacy') || query.includes('rx')) {
-    return `💊 <b>Prescription Drug Coverage (Capital Rx):</b><br>
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li><b>Automatic Benefit:</b> Prescription coverage is automatically included with all CBSD medical plans (no add-on selection needed).</li>
-      <li><b>Capital Rx Login:</b> Log in or register at the <a href="https://app.cap-rx.com/login" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">Capital Rx Portal</a> to track your prescriptions, look up covered drugs, and manage your account.</li>
-      <li><b>30-Day Retail Tiers:</b> Generic ($10), Preferred Brand ($25), Non-Preferred Brand ($40), Specialty ($100).</li>
-      <li><b>90-Day Mail Order Tiers:</b> Generic ($20), Preferred Brand ($50), Non-Preferred ($80).</li>
-      <li><b>Note:</b> Under the Transportation contract, retail Tier 2/3/4 copays are slightly lower ($20/$35/$35) and mail-order Tier 2 is $40.</li>
-    </ul>`;
-  }
-
-  // 14. Emergency Room & Ambulance
-  if (query.includes('er ') || query.includes('emergency') || query.includes('accident') || query.includes('ambulance')) {
-    return `🚨 <b>Emergency Room & Ambulance Care:</b><br>
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li><b>Emergency Room Visit:</b> <b>$100 Copay</b> across all four plans (waived immediately if admitted directly to the hospital).</li>
-      <li><b>Ambulance Services:</b>
-        <ul>
-          <li>Open Access, Choice 1, Choice 2: 100% Covered ($0 cost).</li>
-          <li>Open Choice 3: 100% Covered <i>after meeting the deductible</i> ($1,100 Ind / $2,200 Fam).</li>
-        </ul>
-      </li>
-    </ul>`;
-  }
-
-  // 15. Open Choice 3 / Thrift Option
-  if (query.includes('choice 3') || query.includes('oc3') || query.includes('thrift') || query.includes('saver')) {
-    return `🛡️ <b>Open Choice 3 ("The Thrift Option")</b><br>
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li><b>Premium Cost:</b> Lowest monthly premium of any plan.</li>
-      <li><b>Benefit:</b> In exchange, you pay 100% of diagnostics out-of-pocket until you meet the deductible. Stay safe out there!</li>
-    </ul>`;
-  }
-
-  // 16. Acupuncture & Other Covered Services
-  if (query.includes('acupuncture') || query.includes('bariatric') || query.includes('infertility') || query.includes('private duty') || query.includes('nursing') || query.includes('chiropractic') || query.includes('chiro')) {
-    return `⚕️ <b>Acupuncture & Other Covered Services:</b><br>
-    <ul style="margin: 0.35rem 0 0; padding-left: 1.15rem; font-size: 0.775rem; display: flex; flex-direction: column; gap: 0.2rem;">
-      <li><b>Acupuncture:</b> Covered in-network across all four plans (limitations or preauthorization may apply).</li>
-      <li><b>Chiropractic Care:</b> Covered in-network (100 visits/yr for Open Access; 30 visits/yr for Choice 1, 2, & 3).</li>
-      <li><b>Bariatric Surgery:</b> Covered in-network on all plans (limited to 1 procedure per lifetime).</li>
-      <li><b>Private-Duty Nursing:</b> Covered in-network (limited to 45 shifts of 8 hours per plan year).</li>
-      <li><b>Infertility Treatment:</b> Covered in-network on Open Access (limitations apply); check your plan SBC or contact HR for coverage details on Choice plans.</li>
-    </ul>`;
-  }
-
-  // Default fallback
-  return `❓ <b>I can help you with specific benefits details!</b><br>
-  Try asking about:<br>
-  • Deductibles or Out-of-Pocket Maximums<br>
-  • PCP or Specialist office visit copays<br>
-  • How X-Rays or MRIs are covered<br>
-  • Dental eligibility for Support Staff<br>
-  • Transportation 1080 hours rule<br>
-  • Acupuncture, bariatric, or private duty nursing coverage`;
+  fallbackReply += `</div>`;
+  return fallbackReply;
 }
 
 // Floating Chat Helper Logic
@@ -1532,6 +2417,28 @@ function appendMessage(sender, text) {
   }
 }
 
+function showTypingIndicator() {
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'chat-msg bot typing';
+  typingDiv.id = 'chat-typing-indicator';
+  typingDiv.innerHTML = `
+    <span class="typing-dot"></span>
+    <span class="typing-dot"></span>
+    <span class="typing-dot"></span>
+  `;
+  if (chatMessages) {
+    chatMessages.appendChild(typingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+}
+
+function removeTypingIndicator() {
+  const typingDiv = document.getElementById('chat-typing-indicator');
+  if (typingDiv) {
+    typingDiv.remove();
+  }
+}
+
 function handleUserMessage() {
   if (!chatInput) return;
   const text = chatInput.value.trim();
@@ -1540,11 +2447,13 @@ function handleUserMessage() {
   appendMessage('user', text);
   chatInput.value = '';
   
-  // Simulated bot typing response
+  showTypingIndicator();
+  
   setTimeout(() => {
+    removeTypingIndicator();
     const reply = generateBotResponse(text);
     appendMessage('bot', reply);
-  }, 400);
+  }, 600 + Math.random() * 200);
 }
 
 if (chatSendBtn) {
@@ -1564,12 +2473,33 @@ chatQuickBtns.forEach(btn => {
     const question = btn.dataset.q;
     appendMessage('user', question);
     
+    showTypingIndicator();
     setTimeout(() => {
+      removeTypingIndicator();
       const reply = generateBotResponse(question);
       appendMessage('bot', reply);
-    }, 300);
+    }, 500);
   });
 });
+
+// Event Delegation for Dynamic Follow-up Chips
+if (chatMessages) {
+  chatMessages.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chat-followup-btn');
+    if (btn) {
+      const question = btn.dataset.q;
+      if (question) {
+        appendMessage('user', btn.textContent);
+        showTypingIndicator();
+        setTimeout(() => {
+          removeTypingIndicator();
+          const reply = generateBotResponse(question);
+          appendMessage('bot', reply);
+        }, 500);
+      }
+    }
+  });
+}
 
 // ==========================================
 // 14. Sidebar Enrollment PDF Dropdown Selector

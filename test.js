@@ -10,7 +10,19 @@ const appJsContent = fs.readFileSync(appJsPath, 'utf8');
 const mockDom = `
 const localStorage = { getItem: () => null, setItem: () => null, removeItem: () => null };
 const Event = class {};
+const window = {
+  matchMedia: () => ({ matches: false }),
+  addEventListener: () => {}
+};
 const document = {
+  body: {
+    classList: {
+      add: () => {},
+      remove: () => {},
+      toggle: () => false,
+      contains: () => false
+    }
+  },
   getElementById: (id) => {
     let val = 'cbea';
     if (id === 'coverage-tier') val = 'individual';
@@ -24,15 +36,26 @@ const document = {
       style: {}, 
       parentElement: { style: {}, querySelector: () => ({ textContent: '' }) },
       appendChild: () => {},
-      innerHTML: ''
+      innerHTML: '',
+      checked: false,
+      disabled: false,
+      textContent: '',
+      click: () => {}
     };
   },
   querySelector: () => ({
     insertBefore: () => {},
-    classList: { add: () => {}, remove: () => {} }
+    classList: { add: () => {}, remove: () => {} },
+    style: {}
   }),
   querySelectorAll: () => [],
-  createElement: () => ({ style: {}, classList: { add: () => {}, remove: () => {} } })
+  createElement: () => ({ style: {}, classList: { add: () => {}, remove: () => {} } }),
+  createElementNS: () => ({
+    setAttribute: () => {},
+    appendChild: () => {},
+    addEventListener: () => {},
+    style: {}
+  })
 };
 `;
 

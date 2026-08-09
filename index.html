@@ -17,6 +17,18 @@
 
   <div class="container">
     <header>
+      <!-- Theme Switcher Button -->
+      <button id="dark-mode-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+        <!-- Sun icon -->
+        <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707m12.728 12.728A9 9 0 115.636 5.636m12.728 12.728A9 9 0 015.636 5.636" />
+        </svg>
+        <!-- Moon icon -->
+        <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+
       <span class="badge">Central Bucks School District 2026-27</span>
       <h1 id="app-title">Healthcare Plan Simulator</h1>
       <p class="subtitle" style="margin-bottom: 0;">
@@ -46,6 +58,12 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618-3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
           🦷 See Dental Plan (Dental Cheat Sheet)
+        </button>
+        <button id="btn-compare-matrix" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.85rem; border-radius: 100px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); color: var(--accent-blue); font-size: 0.775rem; font-weight: 600; text-decoration: none; transition: opacity 0.15s; cursor: pointer; font-family: inherit;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="vertical-align: middle;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          📊 Compare Plans Side-by-Side
         </button>
       </div>
     </header>
@@ -97,6 +115,14 @@
               <input type="checkbox" id="toggle-vision" class="toggle-input">
               <span class="toggle-slider"></span>
               <span style="font-weight: 600; color: var(--text-primary);">Add Voluntary Vision (Eye Med)</span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-dental" class="toggle-input">
+              <span class="toggle-slider"></span>
+              <span id="dental-toggle-text" style="font-weight: 600; color: var(--text-primary);">Add Voluntary Dental (Guardian)</span>
             </label>
           </div>
 
@@ -203,11 +229,221 @@
           <!-- Dynamically generated plan cards go here -->
         </div>
 
-        <!-- SECTION 2: Interactive Plan Benefits & Coverage Explorer -->
+        <!-- SECTION 2: Personal Health Use Simulator -->
+        <div class="card" style="margin-bottom: 2rem;">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-teal);"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+            2. Personal Health Use Simulator
+          </h2>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+            Estimate your total annual cost (fixed payroll deductions + your out-of-pocket costs at the clinic) by selecting a medical usage scenario or customizing the sliders.
+          </p>
+          
+          <!-- Usage Presets -->
+          <div style="margin-bottom: 1.5rem;">
+            <label style="font-weight: 600; margin-bottom: 0.5rem; display: block; color: var(--text-primary);">Select a Medical Usage Scenario Preset:</label>
+            <div class="presets-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
+              <button class="btn-preset active" id="preset-low">🌱 Low Use / Wellness</button>
+              <button class="btn-preset" id="preset-mod">🩹 Moderate / Accident</button>
+              <button class="btn-preset" id="preset-high">🤰 High / Pregnancy</button>
+            </div>
+          </div>
+
+          <!-- Core Sliders Grid -->
+          <div class="slider-container-grid">
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slide-pcp" style="font-weight: 500;">🩺 PCP Visits</label>
+                <span class="slider-value" id="val-pcp">0</span>
+              </div>
+              <input type="range" id="slide-pcp" min="0" max="30" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slide-specialist" style="font-weight: 500;">🥼 Specialist Visits</label>
+                <span class="slider-value" id="val-specialist">0</span>
+              </div>
+              <input type="range" id="slide-specialist" min="0" max="30" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slide-urgent" style="font-weight: 500;">⚡ Urgent Care Visits</label>
+                <span class="slider-value" id="val-urgent">0</span>
+              </div>
+              <input type="range" id="slide-urgent" min="0" max="15" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slide-er" style="font-weight: 500;">🚨 ER Visits</label>
+                <span class="slider-value" id="val-er">0</span>
+              </div>
+              <input type="range" id="slide-er" min="0" max="10" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slide-inpatient" style="font-weight: 500;">🏥 Hosp Admissions</label>
+                <span class="slider-value" id="val-inpatient">0</span>
+              </div>
+              <input type="range" id="slide-inpatient" min="0" max="5" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slide-inpatient-days" style="font-weight: 500;">📅 Inpatient Days</label>
+                <span class="slider-value" id="val-inpatient-days">0</span>
+              </div>
+              <input type="range" id="slide-inpatient-days" min="0" max="30" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slide-outpatient" style="font-weight: 500;">🔪 Outpatient Surgery</label>
+                <span class="slider-value" id="val-outpatient">0</span>
+              </div>
+              <input type="range" id="slide-outpatient" min="0" max="5" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slide-therapy" style="font-weight: 500;">💪 PT/OT Therapy Visits</label>
+                <span class="slider-value" id="val-therapy">0</span>
+              </div>
+              <input type="range" id="slide-therapy" min="0" max="80" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slide-chiro" style="font-weight: 500;">🦴 Chiropractic Visits</label>
+                <span class="slider-value" id="val-chiro">0</span>
+              </div>
+              <input type="range" id="slide-chiro" min="0" max="60" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slide-xray" style="font-weight: 500;">🩻 Diagnostic X-Rays</label>
+                <span class="slider-value" id="val-xray">0</span>
+              </div>
+              <input type="range" id="slide-xray" min="0" max="20" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slide-lab" style="font-weight: 500;">🧪 Lab Works</label>
+                <span class="slider-value" id="val-lab">0</span>
+              </div>
+              <input type="range" id="slide-lab" min="0" max="30" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slide-imaging" style="font-weight: 500;">🌀 Complex Scans (MRI/CT)</label>
+                <span class="slider-value" id="val-imaging">0</span>
+              </div>
+              <input type="range" id="slide-imaging" min="0" max="10" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slide-rx-generic" style="font-weight: 500;">💊 Generic Rx Fills (30d)</label>
+                <span class="slider-value" id="val-rx-generic">0</span>
+              </div>
+              <input type="range" id="slide-rx-generic" min="0" max="60" value="0">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slide-rx-brand" style="font-weight: 500;">💊 Brand Rx Fills (30d)</label>
+                <span class="slider-value" id="val-rx-brand">0</span>
+              </div>
+              <input type="range" id="slide-rx-brand" min="0" max="30" value="0">
+            </div>
+          </div>
+
+          <!-- Costs Calculation Matrix Table -->
+          <h4 class="section-subtitle">Estimated Total Annual Cost Breakdown</h4>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Plan Cost Breakdown</th>
+                  <th id="th-calc-oa">Open Access</th>
+                  <th id="th-calc-oc1">Open Choice 1</th>
+                  <th id="th-calc-oc2">Open Choice 2</th>
+                  <th id="th-calc-oc3">Open Choice 3</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Annual Fixed Premium (Paycheck)</td>
+                  <td id="calc-oa-premium">$0.00</td>
+                  <td id="calc-oc1-premium">$0.00</td>
+                  <td id="calc-oc2-premium">$0.00</td>
+                  <td id="calc-oc3-premium">$0.00</td>
+                </tr>
+                <tr>
+                  <td>Voluntary Add-ons (Vision & Dental)</td>
+                  <td id="calc-oa-voluntary">$0.00</td>
+                  <td id="calc-oc1-voluntary">$0.00</td>
+                  <td id="calc-oc2-voluntary">$0.00</td>
+                  <td id="calc-oc3-voluntary">$0.00</td>
+                </tr>
+                <tr>
+                  <td>Estimated Medical OOP Cost</td>
+                  <td id="calc-oa-med-oop">$0.00</td>
+                  <td id="calc-oc1-med-oop">$0.00</td>
+                  <td id="calc-oc2-med-oop">$0.00</td>
+                  <td id="calc-oc3-med-oop">$0.00</td>
+                </tr>
+                <tr>
+                  <td>Estimated Prescription OOP Cost</td>
+                  <td id="calc-oa-rx-oop">$0.00</td>
+                  <td id="calc-oc1-rx-oop">$0.00</td>
+                  <td id="calc-oc2-rx-oop">$0.00</td>
+                  <td id="calc-oc3-rx-oop">$0.00</td>
+                </tr>
+                <tr class="highlight-row">
+                  <td>
+                    <span class="tooltip" style="cursor: help; border-bottom: 1px dotted var(--text-secondary);">Total Annual Cost ℹ️
+                      <span class="tooltiptext">Sum of annual paycheck premiums + voluntary vision/dental + estimated out-of-pocket costs at point of care. Capped by plan OOP maximums.</span>
+                    </span>
+                  </td>
+                  <td id="calc-oa-total" style="font-weight: 800;">$0.00</td>
+                  <td id="calc-oc1-total" style="font-weight: 800;">$0.00</td>
+                  <td id="calc-oc2-total" style="font-weight: 800;">$0.00</td>
+                  <td id="calc-oc3-total" style="font-weight: 800;">$0.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Dynamic SVG Chart -->
+          <h4 class="section-subtitle">Visual Cost Breakdown (Premium vs. Out-of-Pocket)</h4>
+          <div class="chart-container" style="background: rgba(15, 23, 42, 0.01); border-radius: var(--radius-sm); border: 1px solid var(--border-glass); padding: 1rem;">
+            <svg class="svg-chart" id="svg-cost-chart" viewBox="0 0 600 300" style="width: 100%; height: auto; max-height: 280px; display: block; overflow: visible;">
+              <!-- Chart will be rendered dynamically by JavaScript -->
+            </svg>
+          </div>
+
+          <!-- Recommendation Banner -->
+          <div class="rec-banner" id="rec-banner-container" style="display: none;">
+            <div class="rec-icon" id="rec-banner-icon">💡</div>
+            <div class="rec-content">
+              <h4 id="rec-banner-title">Plan Recommendation</h4>
+              <p id="rec-banner-text" style="margin: 0; line-height: 1.4; font-size: 0.85rem;"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: Interactive Plan Benefits & Coverage Explorer -->
         <div class="card" style="margin-bottom: 2rem;">
           <h2 class="card-title">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-blue);"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-            2. Interactive Plan Benefits & Coverage Explorer
+            3. Interactive Plan Benefits & Coverage Explorer
           </h2>
           <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
             Select a medical service below to see a side-by-side comparison of how much you pay (In-Network vs. Out-of-Network) under each plan.
@@ -240,11 +476,11 @@
           </div>
         </div>
 
-        <!-- SECTION 3: Detailed Benefits & Plan Summaries Accordion -->
+        <!-- SECTION 4: Detailed Benefits & Plan Summaries Accordion -->
         <div class="card" style="margin-bottom: 2rem;">
           <h2 class="card-title">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-indigo); vertical-align: middle; margin-right: 6px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            3. Detailed Benefits & Plan Summaries
+            4. Detailed Benefits & Plan Summaries
           </h2>
           <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
             Click on a plan below to expand and view detailed coverage summaries, deductibles, allowances, and copays.
@@ -603,6 +839,24 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
         </svg>
       </button>
+    </div>
+  </div>
+
+  <!-- Plan Comparison Matrix Modal -->
+  <div class="modal" id="compare-modal">
+    <div class="modal-content" style="max-width: 800px; padding: 1.5rem; border-radius: var(--radius-md);">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" style="margin: 0; font-size: 1.15rem;">📊 Side-by-Side Plan Comparison</h3>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0.15rem 0 0;">Comprehensive plan summary matrix for your active group</p>
+        </div>
+        <button class="modal-close" id="btn-close-compare" aria-label="Close Comparison Modal">&times;</button>
+      </div>
+      <div class="modal-body" style="padding-top: 1rem; overflow-x: auto;">
+        <table class="comparison-table" id="compare-matrix-table">
+          <!-- JavaScript will dynamically populate the comparison matrix rows based on active group -->
+        </table>
+      </div>
     </div>
   </div>
 
